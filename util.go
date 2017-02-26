@@ -61,7 +61,7 @@ func ConnectedPawns(pos *Position, us Color) Bitboard {
 
 // Minors returns a bitboard with all knights and bishops.
 func Minors(pos *Position, us Color) Bitboard {
-	return pos.ByPiece2(us, Rook, Queen)
+	return pos.ByPiece2(us, Knight, Bishop)
 }
 
 // Majors returns a bitboard with all rooks and queens.
