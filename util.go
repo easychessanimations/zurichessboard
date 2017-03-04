@@ -81,3 +81,11 @@ func SemiOpenFiles(pos *Position, us Color) Bitboard {
 	theirs := pos.ByPiece(us.Opposite(), Pawn)
 	return Fill(theirs) &^ Fill(ours)
 }
+
+// KingArea returns an area around king.
+func KingArea(pos *Position, us Color) Bitboard {
+        bb := pos.ByPiece(us, King)
+        bb = East(bb)|bb|West(bb)
+        bb = North(bb)|bb|South(bb)
+        return bb
+}
