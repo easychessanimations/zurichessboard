@@ -31,9 +31,8 @@ func (te *testEngine) Move(m string) {
 	if m != "" {
 		move, _ = te.Pos.UCIToMove(m)
 	}
-	if te.Pos.SideToMove == move.Capture().Color() {
-		te.T.Fatalf("%v cannot capture its own color (move %v)",
-			te.Pos.SideToMove, move)
+	if te.Pos.Us() == move.Capture().Color() {
+		te.T.Fatalf("%v cannot capture its own color (move %v)", te.Pos.Us(), move)
 	}
 	te.moves = append(te.moves, move)
 	te.Pos.DoMove(move)

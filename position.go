@@ -67,7 +67,7 @@ type state struct {
 type Position struct {
 	ByFigure   [FigureArraySize]Bitboard // bitboards of square occupancy by figure.
 	ByColor    [ColorArraySize]Bitboard  // bitboards of square occupancy by color.
-	SideToMove Color                     // which side is to move. SideToMove is updated by DoMove and UndoMove.
+	sideToMove Color                     // which side is to move. sideToMove is updated by DoMove and UndoMove.
 	Ply        int                       // current ply
 	NumPieces  [PieceArraySize]int32     // number of pieces of each kind
 
@@ -143,12 +143,12 @@ func (pos *Position) SetHalfmoveClock(n int) {
 //
 // Us/Them is based on Glaurung terminology.
 func (pos *Position) Us() Color {
-	return pos.SideToMove
+	return pos.sideToMove
 }
 
 // Them returns the player awaiting to move.
 func (pos *Position) Them() Color {
-	return pos.SideToMove.Opposite()
+	return pos.sideToMove.Opposite()
 }
 
 // IsEnpassantSquare returns true if sq is the en passant square.
@@ -342,9 +342,9 @@ func (pos *Position) SetCastlingAbility(castle Castle) {
 
 // SetSideToMove sets the side to move, correctly updating the Zobrist key.
 func (pos *Position) SetSideToMove(col Color) {
-	pos.curr.Zobrist ^= zobristColor[pos.SideToMove]
-	pos.SideToMove = col
-	pos.curr.Zobrist ^= zobristColor[pos.SideToMove]
+	pos.curr.Zobrist ^= zobristColor[pos.sideToMove]
+	pos.sideToMove = col
+	pos.curr.Zobrist ^= zobristColor[pos.sideToMove]
 }
 
 // SetEnpassantSquare sets the en passant square correctly updating the Zobrist key.

@@ -228,7 +228,7 @@ func ParseSideToMove(str string, pos *Position) error {
 
 // FormatSideToMove returns "w" for white to play or "b" for black to play.
 func FormatSideToMove(pos *Position) string {
-	return colorToSymbol[pos.SideToMove:][:1]
+	return colorToSymbol[pos.Us():][:1]
 }
 
 // ParseCastlingAbility sets castling ability for pos from str.
