@@ -32,10 +32,10 @@ func TestPassedPawns(t *testing.T) {
 	}
 
 	for i, d := range data {
-		pos := &Position{}
-		pos.ByFigure[Pawn] = d.ours | d.theirs
-		pos.ByColor[d.us] = d.ours
-		pos.ByColor[d.us.Opposite()] = d.theirs
+		pos := NewPosition()
+		pos.curr.ByFigure[Pawn] = d.ours | d.theirs
+		pos.curr.ByColor[d.us] = d.ours
+		pos.curr.ByColor[d.us.Opposite()] = d.theirs
 		got := PassedPawns(pos, d.us)
 		if d.want != got {
 			t.Errorf("#%d wanted PassedPawns(%s, %x, %x) == %x, got %x",
@@ -55,9 +55,9 @@ func TestIsolatedPawns(t *testing.T) {
 	}
 
 	for i, d := range data {
-		pos := &Position{}
-		pos.ByFigure[Pawn] = d.pawns
-		pos.ByColor[White] = d.pawns
+		pos := NewPosition()
+		pos.curr.ByFigure[Pawn] = d.pawns
+		pos.curr.ByColor[White] = d.pawns
 		got := IsolatedPawns(pos, White)
 		if d.want != got {
 			t.Errorf("#%d wanted IsolatedPawns(%x) == %x, got %x",
@@ -77,9 +77,9 @@ func TestConnectedPawns(t *testing.T) {
 	}
 
 	for i, d := range data {
-		pos := &Position{}
-		pos.ByFigure[Pawn] = d.pawns
-		pos.ByColor[White] = d.pawns
+		pos := NewPosition()
+		pos.curr.ByFigure[Pawn] = d.pawns
+		pos.curr.ByColor[White] = d.pawns
 		got := ConnectedPawns(pos, White)
 		if d.want != got {
 			t.Errorf("#%d wanted ConnectedPawns(%x) == %x, got %x",
@@ -112,9 +112,9 @@ func TestDoubledPawns(t *testing.T) {
 	}
 
 	for i, d := range data {
-		pos := &Position{}
-		pos.ByFigure[Pawn] = d.ours
-		pos.ByColor[d.us] = d.ours
+		pos := NewPosition()
+		pos.curr.ByFigure[Pawn] = d.ours
+		pos.curr.ByColor[d.us] = d.ours
 		got := DoubledPawns(pos, d.us)
 		if d.want != got {
 			t.Errorf("#%d wanted DoubledPawns(%v, %x) == %x, got %x",
@@ -136,9 +136,9 @@ func TestPawnThreats(t *testing.T) {
 	}
 
 	for i, d := range data {
-		pos := &Position{}
-		pos.ByFigure[Pawn] = d.ours
-		pos.ByColor[d.us] = d.ours
+		pos := NewPosition()
+		pos.curr.ByFigure[Pawn] = d.ours
+		pos.curr.ByColor[d.us] = d.ours
 		got := PawnThreats(pos, d.us)
 		if d.want != got {
 			t.Errorf("#%d wanted PawnThreats(%v, %x) == %x, got %x",
@@ -164,10 +164,10 @@ func TestBackwardPawns(t *testing.T) {
 	}
 
 	for i, d := range data {
-		pos := &Position{}
-		pos.ByFigure[Pawn] = d.ours | d.theirs
-		pos.ByColor[d.us] = d.ours
-		pos.ByColor[d.us.Opposite()] = d.theirs
+		pos := NewPosition()
+		pos.curr.ByFigure[Pawn] = d.ours | d.theirs
+		pos.curr.ByColor[d.us] = d.ours
+		pos.curr.ByColor[d.us.Opposite()] = d.theirs
 		got := BackwardPawns(pos, d.us)
 		if d.want != got {
 			t.Errorf("#%d wanted BackwardPawns(%s, %x, %x) == %x, got %x",

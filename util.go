@@ -71,7 +71,7 @@ func Majors(pos *Position, us Color) Bitboard {
 
 // OpenFiles returns all fully set files with no pawns.
 func OpenFiles(pos *Position, us Color) Bitboard {
-	pawns := pos.ByFigure[Pawn]
+	pawns := pos.ByFigure(Pawn)
 	return ^Fill(pawns)
 }
 
