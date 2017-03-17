@@ -190,16 +190,21 @@ func (pos *Position) MinorsAndMajors(col Color) Bitboard {
 // IsPseudoLegal returns true if m is a pseudo legal move for pos.
 // It returns true iff m can be executed even if own king is in check
 // after the move. NullMove is not a valid move.
+// Assumes that there exists a position for which this move is valid,
+// e.g. not a rook moving diagonally or a pawn promoting on 4th rank.
 func (pos *Position) IsPseudoLegal(m Move) bool {
 	if m == NullMove ||
 		m.Color() != pos.Us() ||
 		!pos.Has(m.From(), m.Piece()) ||
-		!pos.Has(m.CaptureSquare(), m.Capture()) ||
-		m.Color() == m.Capture().Color() {
+		!pos.Has(m.CaptureSquare(), m.Capture()) {
 		return false
 	}
 
-	if m.Piece().Figure() == Pawn {
+	from, to := m.From(), m.To()
+	all := pos.ByColor[White] | pos.ByColor[Black]
+
+	switch m.Figure() {
+	case Pawn:
 		// Pawn move is tested above. Promotion is always correct.
 		if m.MoveType() == Enpassant && !pos.IsEnpassantSquare(m.To()) {
 			return false
@@ -208,29 +213,24 @@ func (pos *Position) IsPseudoLegal(m Move) bool {
 			return false
 		}
 		return true
-	}
-	if m.Piece().Figure() == Knight {
-		// Knight move is tested above. Knight jumps around.
+	case Knight: // Knight jumps around.
 		return true
-	}
-
-	// Quick test of queen's attack on an empty board.
-	from, to := m.From(), m.To()
-	if !bbSuperAttack[from].Has(to) {
-		return false
-	}
-
-	all := pos.ByColor[White] | pos.ByColor[Black]
-
-	switch m.Piece().Figure() {
-	case Pawn, Knight: // handled above
-		panic("unreachable")
-	case Bishop:
-		return BishopMobility(from, all).Has(to)
-	case Rook:
-		return RookMobility(from, all).Has(to)
-	case Queen:
-		return QueenMobility(from, all).Has(to)
+	case Bishop, Rook, Queen:
+		// bbSuperAttack contains queen's mobility on an empty board.
+		// Intersecting mobility from `from` and from `to` we get
+		// the diagonal, rank or file on which the piece moved. If the
+		// intersection is empty we are sure that no other piece was in the way.
+		if bbSuperAttack[from]&bbSuperAttack[to]&all == BbEmpty {
+			return true
+		}
+		switch m.Figure() {
+		case Bishop:
+			return BishopMobility(from, all).Has(to)
+		case Rook:
+			return RookMobility(from, all).Has(to)
+		case Queen:
+			return QueenMobility(from, all).Has(to)
+		}
 	case King:
 		if m.MoveType() == Normal {
 			return bbKingAttack[from].Has(to)
