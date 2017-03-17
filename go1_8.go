@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build !go1.9
+
 package board
 
 const (
@@ -21,7 +23,7 @@ var (
 // logN returns the logarithm of n, where n is a power of two.
 func logN(n uint64) uint {
 	return debrujin64[n*debrujinMul>>debrujinShift] & 63
-	// &63 lets the compiler now that sq fits 6 bits and should not generate CMPQ, SBBQ, ANDQ instructions on amd64
+	// &63 lets the compiler know that sq fits 6 bits and should not generate CMPQ, SBBQ, ANDQ instructions on amd64
 }
 
 const (
