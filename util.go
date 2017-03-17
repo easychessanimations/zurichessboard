@@ -84,8 +84,8 @@ func SemiOpenFiles(pos *Position, us Color) Bitboard {
 
 // KingArea returns an area around king.
 func KingArea(pos *Position, us Color) Bitboard {
-        bb := pos.ByPiece(us, King)
-        bb = East(bb)|bb|West(bb)
-        bb = North(bb)|bb|South(bb)
-        return bb
+	bb := pos.ByPiece(us, King)
+	bb = East(bb) | bb | West(bb)
+	bb = North(bb) | bb | South(bb)
+	return bb
 }
