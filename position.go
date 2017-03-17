@@ -1,4 +1,3 @@
-// Copyright 2014-2016 The Zurichess Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -194,9 +193,9 @@ func (pos *Position) MinorsAndMajors(col Color) Bitboard {
 func (pos *Position) IsPseudoLegal(m Move) bool {
 	if m == NullMove ||
 		m.Color() != pos.Us() ||
-		pos.Get(m.From()) != m.Piece() ||
-		pos.Get(m.CaptureSquare()) != m.Capture() ||
-		m.Piece().Color() == m.Capture().Color() {
+		!pos.Has(m.From(), m.Piece()) ||
+		!pos.Has(m.CaptureSquare(), m.Capture()) ||
+		m.Color() == m.Capture().Color() {
 		return false
 	}
 
@@ -411,6 +410,15 @@ func (pos *Position) Remove(sq Square, pi Piece) {
 // IsEmpty returns true if there is no piece at sq.
 func (pos *Position) IsEmpty(sq Square) bool {
 	return !(pos.ByColor[White] | pos.ByColor[Black]).Has(sq)
+}
+
+// Has returns true if pi is in sq.
+// Equivalent to Get(sq) == pi, but faster.
+func (pos *Position) Has(sq Square, pi Piece) bool {
+	if pi != NoPiece {
+		return pos.ByColor[pi.Color()].Has(sq) && pos.ByFigure[pi.Figure()].Has(sq)
+	}
+	return pos.IsEmpty(sq)
 }
 
 // Get returns the piece at sq.

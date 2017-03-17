@@ -513,11 +513,6 @@ func (m Move) MoveType() MoveType {
 	return MoveType(m >> 16 & 0xf)
 }
 
-// Color returns which player is moving.
-func (m Move) Color() Color {
-	return m.Piece().Color()
-}
-
 // CaptureSquare returns the captured piece square.
 // If no piece is captured, the result is the destination square.
 func (m Move) CaptureSquare() Square {
@@ -540,6 +535,16 @@ func (m Move) Target() Piece {
 // Piece returns the piece moved.
 func (m Move) Piece() Piece {
 	return Piece(m >> 28 & 0xf)
+}
+
+// Color returns which player is moving.
+func (m Move) Color() Color {
+	return m.Piece().Color()
+}
+
+// Figure returns which figure is moved.
+func (m Move) Figure() Figure {
+	return m.Piece().Figure()
 }
 
 // Promotion returns the promoted piece if any.
