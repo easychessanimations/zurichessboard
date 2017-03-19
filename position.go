@@ -65,15 +65,16 @@ type state struct {
 
 // Position represents the chess board and keeps track of the move history.
 type Position struct {
-	ByFigure   [FigureArraySize]Bitboard // bitboards of square occupancy by figure.
-	ByColor    [ColorArraySize]Bitboard  // bitboards of square occupancy by color.
 	sideToMove Color                     // which side is to move. sideToMove is updated by DoMove and UndoMove.
 	Ply        int                       // current ply
+	ByColor    [ColorArraySize]Bitboard  // bitboards of square occupancy by color.
+	ByFigure   [FigureArraySize]Bitboard // bitboards of square occupancy by figure.
 	NumPieces  [PieceArraySize]int32     // number of pieces of each kind
 
-	fullmoveCounter int     // fullmove counter, incremented after black move
-	states          []state // a state for each Ply
-	curr            *state  // current state
+	pieces          [SquareArraySize]Piece // tracks pieces at each square
+	fullmoveCounter int                    // fullmove counter, incremented after black move
+	states          []state                // a state for each Ply
+	curr            *state                 // current state
 }
 
 // NewPosition returns a new position representing an empty board.
@@ -392,6 +393,7 @@ func (pos *Position) Put(sq Square, pi Piece) {
 		pos.ByColor[pi.Color()] |= bb
 		pos.ByFigure[pi.Figure()] |= bb
 		pos.NumPieces[pi]++
+		pos.pieces[sq] = pi
 	}
 }
 
@@ -404,40 +406,26 @@ func (pos *Position) Remove(sq Square, pi Piece) {
 		pos.ByColor[pi.Color()] &= bb
 		pos.ByFigure[pi.Figure()] &= bb
 		pos.NumPieces[pi]--
+		pos.pieces[sq] = NoPiece
 	}
 }
 
 // IsEmpty returns true if there is no piece at sq.
+// TODO Remove. Get() is constant time now.
 func (pos *Position) IsEmpty(sq Square) bool {
-	return !(pos.ByColor[White] | pos.ByColor[Black]).Has(sq)
+	return pos.Get(sq) == NoPiece
 }
 
 // Has returns true if pi is in sq.
 // Equivalent to Get(sq) == pi, but faster.
+// TODO Remove. Get() is constant time now.
 func (pos *Position) Has(sq Square, pi Piece) bool {
-	if pi != NoPiece {
-		return pos.ByColor[pi.Color()].Has(sq) && pos.ByFigure[pi.Figure()].Has(sq)
-	}
-	return pos.IsEmpty(sq)
+	return pos.Get(sq) == pi
 }
 
 // Get returns the piece at sq.
 func (pos *Position) Get(sq Square) Piece {
-	var col Color
-	if pos.ByColor[White].Has(sq) {
-		col = White
-	} else if pos.ByColor[Black].Has(sq) {
-		col = Black
-	} else {
-		return NoPiece
-	}
-
-	for fig := FigureMinValue; fig <= FigureMaxValue; fig++ {
-		if pos.ByFigure[fig].Has(sq) {
-			return ColorFigure(col, fig)
-		}
-	}
-	panic("unreachable: square has color, but no figure")
+	return pos.pieces[sq]
 }
 
 // HasLegalMoves returns true if current side has any legal moves.
