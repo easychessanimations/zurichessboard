@@ -196,7 +196,7 @@ func (pos *Position) MinorsAndMajors(col Color) Bitboard {
 func (pos *Position) IsPseudoLegal(m Move) bool {
 	if m == NullMove ||
 		m.Color() != pos.Us() ||
-		pos.Get(m.From()) !=  m.Piece() ||
+		pos.Get(m.From()) != m.Piece() ||
 		pos.Get(m.CaptureSquare()) != m.Capture() {
 		return false
 	}
@@ -502,6 +502,7 @@ func (pos *Position) IsChecked(side Color) bool {
 }
 
 // GivesCheck returns true if the opposite side is in check after m is executed.
+// Assumes that the position is legal and opposite side is not already in check.
 func (pos *Position) GivesCheck(m Move) bool {
 	if m.MoveType() == Castling {
 		// TODO: Bail out on castling because it can check via rook and king.
@@ -512,35 +513,35 @@ func (pos *Position) GivesCheck(m Move) bool {
 	}
 
 	us := pos.Us()
-	all := pos.ByColor(White) | pos.ByColor(Black)
-	all = all&^m.From().Bitboard()&^m.CaptureSquare().Bitboard() | m.To().Bitboard()
-	kingSq := pos.ByPiece(pos.Them(), King).AsSquare()
+	king := pos.ByPiece(pos.Them(), King)
 	fig := m.Target().Figure()
 
-	// Test pawn and king.
+	// Test pawn advance gives check.
 	if fig == Pawn {
-		bb := m.To().Bitboard()
-		bb = Forward(us, bb)
+		bb := Forward(us, m.To().Bitboard())
 		bb = East(bb) | West(bb)
-		if bb.Has(kingSq) {
+		if bb&king != 0 {
 			return true
 		}
 	}
-	mob := KnightMobility(kingSq) &^ m.From().Bitboard()
-	if mob&pos.ByPiece(us, Knight) != 0 ||
-		mob.Has(m.To()) && fig == Knight {
+	// Test if knight move gives check.
+	// There is no such thing as discovered knight check so the check must be from this move.
+	if fig == Knight && KnightMobility(m.To())&king != 0 {
 		return true
 	}
 
 	// Fast check whether king can be attacked by a Bishop, Rook, Queen, King
 	// using the moves of a Queen on an empty table.
-	ours := pos.ByColor(pos.Us())&^m.From().Bitboard() | m.To().Bitboard()
+	kingSq := king.AsSquare()
+	ours := pos.ByColor(us)&^pos.ByPiece2(us, Pawn, Knight)&^m.From().Bitboard() | m.To().Bitboard()
 	if ours&bbSuperAttack[kingSq] == 0 {
 		return false
 	}
 
 	// Test bishop, rook, queen and king.
-	mob = BishopMobility(kingSq, all) &^ m.From().Bitboard()
+	all := pos.ByColor(White) | pos.ByColor(Black)
+	all = all&^m.From().Bitboard()&^m.CaptureSquare().Bitboard() | m.To().Bitboard()
+	mob := BishopMobility(kingSq, all) &^ m.From().Bitboard()
 	if mob&pos.ByPiece2(us, Bishop, Queen) != 0 ||
 		mob.Has(m.To()) && (fig == Bishop || fig == Queen) {
 		return true
