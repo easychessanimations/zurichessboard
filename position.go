@@ -1015,17 +1015,17 @@ func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	// Order of the moves is important because the last quiet
 	// moves will be reduced less.  Current order was produced
 	// by testing 20 random orders and picking the best.
-	pos.genKingMovesNear(mask, moves)
-	pos.genPawnDoubleAdvanceMoves(kind, moves)
-	pos.genRookMoves(Rook, mask, moves)
-	pos.genBishopMoves(Queen, mask, moves)
-	pos.genPawnAttackMoves(kind, moves)
-	pos.genPawnAdvanceMoves(kind, moves)
 	pos.genPawnPromotions(kind, moves)
-	pos.genKnightMoves(mask, moves)
-	pos.genBishopMoves(Bishop, mask, moves)
+	pos.genKingMovesNear(mask, moves)
 	pos.genKingCastles(kind, moves)
+	pos.genBishopMoves(Queen, mask, moves)
 	pos.genRookMoves(Queen, mask, moves)
+	pos.genRookMoves(Rook, mask, moves)
+	pos.genBishopMoves(Bishop, mask, moves)
+	pos.genKnightMoves(mask, moves)
+	pos.genPawnDoubleAdvanceMoves(kind, moves)
+	pos.genPawnAdvanceMoves(kind, moves)
+	pos.genPawnAttackMoves(kind, moves)
 }
 
 // GenerateFigureMoves generate moves for a given figure.
