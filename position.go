@@ -69,7 +69,6 @@ type state struct {
 type Position struct {
 	sideToMove Color                 // which side is to move. sideToMove is updated by DoMove and UndoMove.
 	Ply        int                   // current ply
-	NumPieces  [PieceArraySize]int32 // number of pieces of each kind
 
 	pieces          [SquareArraySize]Piece // tracks pieces at each square
 	fullmoveCounter int                    // fullmove counter, incremented after black move
@@ -402,7 +401,6 @@ func (pos *Position) Put(sq Square, pi Piece) {
 		bb := sq.Bitboard()
 		pos.curr.ByColor[pi.Color()] |= bb
 		pos.curr.ByFigure[pi.Figure()] |= bb
-		pos.NumPieces[pi]++
 		pos.pieces[sq] = pi
 	}
 }
@@ -415,7 +413,6 @@ func (pos *Position) Remove(sq Square, pi Piece) {
 		bb := ^sq.Bitboard()
 		pos.curr.ByColor[pi.Color()] &= bb
 		pos.curr.ByFigure[pi.Figure()] &= bb
-		pos.NumPieces[pi]--
 		pos.pieces[sq] = NoPiece
 	}
 }
@@ -685,9 +682,6 @@ func (pos *Position) UndoMove() {
 	pos.SetSideToMove(pos.Them())
 
 	if move != NullMove {
-		pos.NumPieces[move.Piece()]++
-		pos.NumPieces[move.Target()]--
-		pos.NumPieces[move.Capture()]++
 		pos.pieces[move.From()] = move.Piece()
 		pos.pieces[move.To()] = NoPiece
 		pos.pieces[move.CaptureSquare()] = move.Capture()
