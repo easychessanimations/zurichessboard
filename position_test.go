@@ -996,18 +996,6 @@ func TestInsufficientMaterial(t *testing.T) {
 
 }
 
-func TestNumPieces(t *testing.T) {
-	pos, _ := PositionFromFEN("6k1/Qp1r1pp1/p1rP3p/P3q3/2Bnb1P1/1P3PNP/4p1K1/R1R5 b - - 0 1")
-	expected := [PieceArraySize]int32{0, 0, 6, 6, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1}
-
-	for pi := PieceMinValue; pi <= PieceMaxValue; pi++ {
-		if expected[pi] != pos.NumPieces[pi] {
-			t.Errorf("For %v got pos.NumPieces[pi] == %d, wanted %d",
-				pi, pos.NumPieces[pi], expected[pi])
-		}
-	}
-}
-
 func TestGivesCheck(t *testing.T) {
 	num := 0
 	for i, fen := range TestFENs {
