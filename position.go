@@ -67,8 +67,8 @@ type state struct {
 
 // Position represents the chess board and keeps track of the move history.
 type Position struct {
-	sideToMove Color                 // which side is to move. sideToMove is updated by DoMove and UndoMove.
-	Ply        int                   // current ply
+	sideToMove Color // which side is to move. sideToMove is updated by DoMove and UndoMove.
+	Ply        int   // current ply
 
 	pieces          [SquareArraySize]Piece // tracks pieces at each square
 	fullmoveCounter int                    // fullmove counter, incremented after black move

@@ -232,6 +232,7 @@ func TestViolent(t *testing.T) {
 		{MakeMove(Normal, SquareB1, SquareD2, WhitePawn, WhiteKnight), true},
 		{MakeMove(Promotion, SquareH7, SquareH8, NoPiece, WhiteQueen), true},
 		{MakeMove(Promotion, SquareH7, SquareG8, BlackRook, WhiteQueen), true},
+		{MakeMove(Promotion, SquareH7, SquareG8, BlackRook, WhiteBishop), false},
 	}
 
 	for i, d := range data {
@@ -240,6 +241,50 @@ func TestViolent(t *testing.T) {
 		}
 		if got, wanted := d.move.IsQuiet(), !d.violent; got != wanted {
 			t.Errorf("#%d Got %v.IsQuiet() = %v, wanted %v", i, d.move, got, wanted)
+		}
+	}
+}
+
+func TestLAN(t *testing.T) {
+	data := []struct {
+		move Move
+		lan  string
+	}{
+		{MakeMove(Normal, SquareD2, SquareD4, NoPiece, WhitePawn), "d2-d4"},
+		{MakeMove(Normal, SquareD2, SquareD4, NoPiece, WhitePawn), "d2-d4"},
+		{MakeMove(Castling, SquareE1, SquareG1, NoPiece, WhiteKing), "Ke1-g1"},
+		{MakeMove(Normal, SquareB8, SquareD7, WhitePawn, BlackKnight), "Nb8xd7"},
+		{MakeMove(Normal, SquareB1, SquareD2, WhitePawn, WhiteKnight), "Nb1xd2"},
+		{MakeMove(Promotion, SquareH7, SquareH8, NoPiece, WhiteQueen), "h7-h8Q"},
+		{MakeMove(Promotion, SquareH7, SquareG8, BlackRook, WhiteQueen), "h7xg8Q"},
+		{MakeMove(Promotion, SquareH7, SquareG8, BlackRook, WhiteBishop), "h7xg8B"},
+	}
+
+	for i, d := range data {
+		if got, wanted := d.move.LAN(), d.lan; got != wanted {
+			t.Errorf("#%d Got %v.LAN() = %v, wanted %v", i, d.move, got, wanted)
+		}
+	}
+}
+
+func TestUCI(t *testing.T) {
+	data := []struct {
+		move Move
+		lan  string
+	}{
+		{MakeMove(Normal, SquareD2, SquareD4, NoPiece, WhitePawn), "d2d4"},
+		{MakeMove(Normal, SquareD2, SquareD4, NoPiece, WhitePawn), "d2d4"},
+		{MakeMove(Castling, SquareE1, SquareG1, NoPiece, WhiteKing), "e1g1"},
+		{MakeMove(Normal, SquareB8, SquareD7, WhitePawn, BlackKnight), "b8d7"},
+		{MakeMove(Normal, SquareB1, SquareD2, WhitePawn, WhiteKnight), "b1d2"},
+		{MakeMove(Promotion, SquareH7, SquareH8, NoPiece, WhiteQueen), "h7h8q"},
+		{MakeMove(Promotion, SquareH7, SquareG8, BlackRook, WhiteQueen), "h7g8q"},
+		{MakeMove(Promotion, SquareH7, SquareG8, BlackRook, WhiteBishop), "h7g8b"},
+	}
+
+	for i, d := range data {
+		if got, wanted := d.move.UCI(), d.lan; got != wanted {
+			t.Errorf("#%d Got %v.UCI() = %v, wanted %v", i, d.move, got, wanted)
 		}
 	}
 }
