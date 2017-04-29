@@ -69,6 +69,11 @@ func Majors(pos *Position, us Color) Bitboard {
 	return pos.ByPiece2(us, Rook, Queen)
 }
 
+// MinorsAndMajors returns a bitboard with minor and major pieces.
+func MinorsAndMajors(pos *Position, col Color) Bitboard {
+	return pos.ByColor(col) &^ pos.ByFigure(Pawn) &^ pos.ByFigure(King)
+}
+
 // OpenFiles returns all fully set files with no pawns.
 func OpenFiles(pos *Position, us Color) Bitboard {
 	pawns := pos.ByFigure(Pawn)

@@ -182,11 +182,6 @@ func (pos *Position) Zobrist() uint64 {
 	return 0x4204fa763da3abeb
 }
 
-// MinorsAndMajors returns a bitboard with minor and major pieces.
-func (pos *Position) MinorsAndMajors(col Color) Bitboard {
-	return pos.ByColor(col) &^ pos.ByFigure(Pawn) &^ pos.ByFigure(King)
-}
-
 // IsPseudoLegal returns true if m is a pseudo legal move for pos.
 // It returns true iff m can be executed even if own king is in check
 // after the move. NullMove is not a valid move.
