@@ -1,6 +1,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package board provides functionlity to modify and to work with chess board.
 package board
 
 import (
@@ -15,7 +16,7 @@ const (
 	Violent int = 1 << iota
 	// Quiet are all other moves including minor promotions and castling.
 	Quiet
-	// All moves (deprecated).
+	// All moves.
 	All = Violent | Quiet
 )
 

@@ -24,7 +24,7 @@ var (
 	bbKnightAttack [64]Bitboard
 	// bbKingAttack contains king's attack tables (excluding castling).
 	bbKingAttack [64]Bitboard
-	BbKingArea   [64]Bitboard
+	bbKingArea   [64]Bitboard
 	// bbSuperAttack contains queen piece's attack tables. This queen can jump.
 	bbSuperAttack [64]Bitboard
 
@@ -87,7 +87,7 @@ func initBbKingArea() {
 		{+0, +1}, {+0, +0}, {+0, +1},
 		{-1, -1}, {-1, +0}, {-1, +1},
 	}
-	initJumpAttack(kingJump, BbKingArea[:])
+	initJumpAttack(kingJump, bbKingArea[:])
 }
 
 func initBbSuperAttack() {
