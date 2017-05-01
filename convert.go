@@ -18,7 +18,6 @@ type castleInfo struct {
 }
 
 var (
-	itoa               = "0123456789" // shortcut for Itoa
 	colorToSymbol      = "?bw"
 	pieceToSymbol      = ".?pPnNbBrRqQkK"
 	symbolToCastleInfo = map[rune]castleInfo{
@@ -90,13 +89,13 @@ func PositionFromFEN(fen string) (*Position, error) {
 			continue
 		}
 		if p >= len(f) {
-			return nil, fmt.Errorf("fen has too many fields")
+			return nil, fmt.Errorf("FEN has too many fields")
 		}
 		f[p] = fen[start:limit]
 		p++
 	}
-	if p < len(f) {
-		return nil, fmt.Errorf("fen has too few fields")
+	if p != 4 && p != 6 {
+		return nil, fmt.Errorf("FEN has wrong number of fields, expected 4 or 6")
 	}
 
 	// Parse each field.
@@ -113,13 +112,22 @@ func PositionFromFEN(fen string) (*Position, error) {
 	if err := ParseEnpassantSquare(f[3], pos); err != nil {
 		return nil, err
 	}
-	var err error
-	if pos.curr.HalfmoveClock, err = strconv.Atoi(f[4]); err != nil {
-		return nil, err
+	if p == 6 {
+		var err error
+		if pos.curr.HalfmoveClock, err = strconv.Atoi(f[4]); err != nil {
+			return nil, err
+		}
+		if pos.fullmoveCounter, err = strconv.Atoi(f[5]); err != nil {
+			return nil, err
+		}
+	} else {
+		// Despite being required the last two fields of the FEN string
+		// are often omitted. If the FEN is incomplete, provide default
+		// values for halfmove clock and full move counter.
+		pos.curr.HalfmoveClock = 0
+		pos.fullmoveCounter = 1
 	}
-	if pos.fullmoveCounter, err = strconv.Atoi(f[5]); err != nil {
-		return nil, err
-	}
+
 	pos.Ply = (pos.fullmoveCounter - 1) * 2
 	if pos.Us() == Black {
 		pos.Ply++
@@ -148,7 +156,7 @@ func ParsePiecePlacement(str string, pos *Position) error {
 		}
 		pi := symbolToPiece[p]
 		if pi == NoPiece {
-			return fmt.Errorf("expected rank or number, got %s", string(p))
+			return fmt.Errorf("expected piece or number, got %s", string(p))
 		}
 		if f >= 8 {
 			return fmt.Errorf("rank %d too long (%d cells)", 8-r, f)
@@ -178,7 +186,7 @@ func FormatPiecePlacement(pos *Position) string {
 				space++
 			} else {
 				if space != 0 {
-					s += itoa[space:][:1]
+					s += strconv.Itoa(space)
 					space = 0
 				}
 				s += pieceToSymbol[pi:][:1]
@@ -186,7 +194,7 @@ func FormatPiecePlacement(pos *Position) string {
 		}
 
 		if space != 0 {
-			s += itoa[space:][:1]
+			s += strconv.Itoa(space)
 		}
 		if r != 0 {
 			s += "/"
