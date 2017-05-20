@@ -322,6 +322,11 @@ func (pos *Position) Verify() error {
 		return fmt.Errorf("Expected empty en passant square %v, got %v", sq, pos.Get(sq))
 	}
 
+        // Verifies that the position has two kings.
+        if pos.ByPiece(White, King).CountMax2() != 1 || pos.ByPiece(Black, King).CountMax2() != 1 {
+                return fmt.Errorf("Expected one king of each color")
+        }
+
 	return nil
 }
 
