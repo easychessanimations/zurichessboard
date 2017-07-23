@@ -175,3 +175,26 @@ func TestBackwardPawns(t *testing.T) {
 		}
 	}
 }
+
+func TestPawnPromotionSquare(t *testing.T) {
+	data := []struct {
+		col   Color
+		sq    Square
+		promo Square
+	}{
+		{White, SquareA2, SquareA8},
+		{White, SquareG3, SquareG8},
+		{White, SquareH7, SquareH8},
+		{Black, SquareA7, SquareA1},
+		{Black, SquareG3, SquareG1},
+		{Black, SquareH7, SquareH1},
+	}
+
+	for i, d := range data {
+		got := PawnPromotionSquare(d.col, d.sq)
+		if d.promo != got {
+			t.Errorf("#%d got PawnPromotionSquare(%s, %s) == %s, wanted %s",
+				i, d.col, d.sq, got, d.promo)
+		}
+	}
+}

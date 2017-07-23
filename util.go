@@ -94,3 +94,15 @@ func KingArea(pos *Position, us Color) Bitboard {
 	bb = North(bb) | bb | South(bb)
 	return bb
 }
+
+// PawnPromotionSquare returns the propotion square of a col pawn on sq.
+// Undefined behaviour if col is not White or Black.
+func PawnPromotionSquare(col Color, sq Square) Square {
+	if col == White {
+		return sq | 0x38
+	}
+	if col == Black {
+		return sq &^ 0x38
+	}
+	return sq
+}
