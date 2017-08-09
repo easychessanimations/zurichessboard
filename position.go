@@ -916,7 +916,7 @@ func (pos *Position) genKingCastles(kind int, moves *[]Move) {
 		return
 	}
 
-	rank := pos.Us().KingHomeRank()
+	rank := HomeRank(pos.Us())
 	oo, ooo := WhiteOO, WhiteOOO
 	if pos.Us() == Black {
 		oo, ooo = BlackOO, BlackOOO

@@ -189,18 +189,10 @@ const (
 	ColorMaxValue  = White
 )
 
-var kingHomeRank = [ColorArraySize]int{0, 7, 0}
-
 // Opposite returns the reversed color.
 // Result is undefined if c is not White or Black.
 func (c Color) Opposite() Color {
 	return White + Black - c
-}
-
-// KingHomeRank return king's rank on starting position.
-// Result is undefined if c is not White or Black.
-func (c Color) KingHomeRank() int {
-	return kingHomeRank[c]
 }
 
 // Multiplier returns -1 for Black, 1 for White. Useful

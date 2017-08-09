@@ -198,3 +198,20 @@ func TestPawnPromotionSquare(t *testing.T) {
 		}
 	}
 }
+
+func TestHomeRank(t *testing.T) {
+	data := []struct {
+		col  Color
+		rank int
+	}{
+		{NoColor, 0},
+		{White, 0},
+		{Black, 7},
+	}
+
+	for _, d := range data {
+		if got := HomeRank(d.col); got != d.rank {
+			t.Errorf("Got HomeRank(%v) = %d, %d", d.col, got, d.rank)
+		}
+	}
+}

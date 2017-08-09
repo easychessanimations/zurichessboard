@@ -179,23 +179,6 @@ func TestCastlingRook(t *testing.T) {
 	}
 }
 
-func TestKingHomeRank(t *testing.T) {
-	data := []struct {
-		col  Color
-		rank int
-	}{
-		{NoColor, 0},
-		{White, 0},
-		{Black, 7},
-	}
-
-	for _, d := range data {
-		if d.rank != d.col.KingHomeRank() {
-			t.Errorf("for color %v, expected king home rank %d, got %d", d.col, d.rank, d.col.KingHomeRank())
-		}
-	}
-}
-
 func TestMultiplier(t *testing.T) {
 	data := []struct {
 		col Color

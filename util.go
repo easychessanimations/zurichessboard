@@ -106,3 +106,11 @@ func PawnPromotionSquare(col Color, sq Square) Square {
 	}
 	return sq
 }
+
+var homeRank = [ColorArraySize]int{0, 7, 0}
+
+// HomeRank returns the rank of the king at the begining of the game.
+// Result is undefined if c is not White or Black.
+func HomeRank(col Color) int {
+	return homeRank[col]
+}
