@@ -199,6 +199,25 @@ func TestPawnPromotionSquare(t *testing.T) {
 	}
 }
 
+func TestRammedPawns(t *testing.T) {
+	pos, _ := PositionFromFEN("r3kb1r/5ppp/3p2P1/pp1Pn2P/QP4p1/P1N1BNPp/5P1P/R3KB1R b KQkq - 0 1")
+	data := []struct {
+		col    Color
+		rammed Bitboard
+	}{
+		{White, 0x408000},
+		{Black, 0x40080000000000},
+	}
+
+	for i, d := range data {
+		got := RammedPawns(pos, d.col)
+		if d.rammed != got {
+			t.Errorf("#%d got RammedPawns(%s, %s) == %08x, wanted %08x",
+				i, pos, d.col, got, d.rammed)
+		}
+	}
+}
+
 func TestHomeRank(t *testing.T) {
 	data := []struct {
 		col  Color

@@ -59,6 +59,18 @@ func ConnectedPawns(pos *Position, us Color) Bitboard {
 	return ours & (North(wings) | wings | South(wings))
 }
 
+// RammedPawns returns pawns on ranks 2, 3 for white
+// and rank 6 and 7 blocking an advanced enemy pawn.
+func RammedPawns(pos *Position, us Color) Bitboard {
+	var bb Bitboard
+	if us == White {
+		bb = BbRank2 | BbRank3
+	} else if us == Black {
+		bb = BbRank7 | BbRank6
+	}
+	return pos.ByPiece(us, Pawn) & Backward(us, pos.ByPiece(us.Opposite(), Pawn)) & bb
+}
+
 // Minors returns a bitboard with all knights and bishops.
 func Minors(pos *Position, us Color) Bitboard {
 	return pos.ByPiece2(us, Knight, Bishop)
