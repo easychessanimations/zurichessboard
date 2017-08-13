@@ -64,6 +64,11 @@ type state struct {
 	CastlingAbility Castle                    // remaining castling rights.
 	ByFigure        [FigureArraySize]Bitboard // bitboards of square occupancy by figure.
 	ByColor         [ColorArraySize]Bitboard  // bitboards of square occupancy by color.
+
+	IsCheckedKnown   bool // true if it's known whether the current player is in check or not.
+	IsChecked        bool // true if current player is in check. If true then IsCheckedKnown is also true.
+	GivesCheckMove   Move // last move checkd with GivesCheck.
+	GivesCheckResult bool // true if last move gives check.
 }
 
 // Position represents the chess board and keeps track of the move history.
@@ -393,8 +398,8 @@ func (pos *Position) ByPiece2(col Color, fig0, fig1 Figure) Bitboard {
 // Does nothing if pi is NoPiece. Does not validate input.
 func (pos *Position) Put(sq Square, pi Piece) {
 	if pi != NoPiece {
-		pos.curr.Zobrist ^= zobristPiece[pi][sq]
 		bb := sq.Bitboard()
+		pos.curr.Zobrist ^= zobristPiece[pi][sq]
 		pos.curr.ByColor[pi.Color()] |= bb
 		pos.curr.ByFigure[pi.Figure()] |= bb
 		pos.pieces[sq] = pi
@@ -405,8 +410,8 @@ func (pos *Position) Put(sq Square, pi Piece) {
 // Does nothing if pi is NoPiece. Does not validate input.
 func (pos *Position) Remove(sq Square, pi Piece) {
 	if pi != NoPiece {
-		pos.curr.Zobrist ^= zobristPiece[pi][sq]
 		bb := ^sq.Bitboard()
+		pos.curr.Zobrist ^= zobristPiece[pi][sq]
 		pos.curr.ByColor[pi.Color()] &= bb
 		pos.curr.ByFigure[pi.Figure()] &= bb
 		pos.pieces[sq] = NoPiece
@@ -489,9 +494,17 @@ func (pos *Position) FiftyMoveRule() bool {
 }
 
 // IsChecked returns true if side's king is checked.
-func (pos *Position) IsChecked(side Color) bool {
-	kingSq := pos.ByPiece(side, King).AsSquare()
-	return pos.GetAttacker(kingSq, side.Opposite()) != NoFigure
+func (pos *Position) IsChecked(col Color) bool {
+	if pos.Us() == col && pos.curr.IsCheckedKnown {
+		return pos.curr.IsChecked
+	}
+	kingSq := pos.ByPiece(col, King).AsSquare()
+	isChecked := pos.GetAttacker(kingSq, col.Opposite()) != NoFigure
+	if pos.Us() == col {
+		pos.curr.IsCheckedKnown = true
+		pos.curr.IsChecked = isChecked
+	}
+	return isChecked
 }
 
 // GivesCheck returns true if the opposite side is in check after m is executed.
@@ -499,15 +512,19 @@ func (pos *Position) IsChecked(side Color) bool {
 func (pos *Position) GivesCheck(m Move) bool {
 	if m.MoveType() == Castling {
 		// TODO: Bail out on castling because it can check via rook and king.
+		pos.curr.GivesCheckMove, pos.curr.GivesCheckResult = NullMove, false
 		pos.DoMove(m)
 		givesCheck := pos.IsChecked(pos.Us())
 		pos.UndoMove()
+		pos.curr.GivesCheckMove, pos.curr.GivesCheckResult = m, givesCheck
 		return givesCheck
 	}
 
 	us := pos.Us()
 	king := pos.ByPiece(pos.Them(), King)
 	fig := m.Target().Figure()
+	pos.curr.GivesCheckMove = m
+	pos.curr.GivesCheckResult = true
 
 	// Test pawn advance gives check.
 	if fig == Pawn {
@@ -528,6 +545,7 @@ func (pos *Position) GivesCheck(m Move) bool {
 	kingSq := king.AsSquare()
 	ours := pos.ByColor(us)&^pos.ByPiece2(us, Pawn, Knight)&^m.From().Bitboard() | m.To().Bitboard()
 	if ours&bbSuperAttack[kingSq] == 0 {
+		pos.curr.GivesCheckResult = false
 		return false
 	}
 
@@ -552,6 +570,7 @@ func (pos *Position) GivesCheck(m Move) bool {
 		return true
 	}
 
+	pos.curr.GivesCheckResult = false
 	return false
 }
 
@@ -636,7 +655,6 @@ func (pos *Position) UCIToMove(s string) (Move, error) {
 func (pos *Position) DoMove(move Move) {
 	pos.pushState()
 	curr := pos.curr
-	curr.Move = move
 
 	// Update castling rights.
 	pi := move.Piece()
@@ -670,6 +688,12 @@ func (pos *Position) DoMove(move Move) {
 	pos.Remove(move.CaptureSquare(), move.Capture())
 	pos.Put(move.To(), move.Target())
 	pos.SetSideToMove(pos.Them())
+
+	curr.Move = move
+	curr.IsCheckedKnown = move != NullMove && pos.curr.GivesCheckMove == move
+	curr.IsChecked = curr.IsCheckedKnown && pos.curr.GivesCheckResult
+	curr.GivesCheckMove = NullMove
+	curr.GivesCheckResult = false
 }
 
 // UndoMove takes back the last move.
@@ -694,7 +718,7 @@ func (pos *Position) UndoMove() {
 	pos.popState()
 }
 
-func (pos *Position) genPawnPromotions(kind int, moves *[]Move) {
+func (pos *Position) genPawnPromotions(kind int, mask Bitboard, moves *[]Move) {
 	// Minimum and maximum promotion pieces.
 	// Quiet -> Knight - Rook
 	// Violent -> Queen
@@ -730,13 +754,13 @@ func (pos *Position) genPawnPromotions(kind int, moves *[]Move) {
 				*moves = append(*moves, MakeMove(Promotion, from, to, NoPiece, ColorFigure(us, p)))
 			}
 		}
-		if to.File() != 0 && theirs.Has(to-1) { // take west
+		if to.File() != 0 && theirs.Has(to-1) && mask.Has(to-1) { // take west
 			capt := pos.Get(to - 1)
 			for p := pMin; p <= pMax; p++ {
 				*moves = append(*moves, MakeMove(Promotion, from, to-1, capt, ColorFigure(us, p)))
 			}
 		}
-		if to.File() != 7 && theirs.Has(to+1) { // take east
+		if to.File() != 7 && theirs.Has(to+1) && mask.Has(to+1) { // take east
 			capt := pos.Get(to + 1)
 			for p := pMin; p <= pMax; p++ {
 				*moves = append(*moves, MakeMove(Promotion, from, to+1, capt, ColorFigure(us, p)))
@@ -747,7 +771,7 @@ func (pos *Position) genPawnPromotions(kind int, moves *[]Move) {
 
 // genPawnAdvanceMoves moves pawns one square.
 // Does not generate promotions.
-func (pos *Position) genPawnAdvanceMoves(kind int, moves *[]Move) {
+func (pos *Position) genPawnAdvanceMoves(kind int, mask Bitboard, moves *[]Move) {
 	if kind&Quiet == 0 {
 		return
 	}
@@ -767,8 +791,9 @@ func (pos *Position) genPawnAdvanceMoves(kind int, moves *[]Move) {
 
 	for ours != 0 {
 		from := ours.Pop()
-		to := from + forward
-		*moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
+		if to := from + forward; mask.Has(to) {
+			*moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
+		}
 	}
 }
 
@@ -866,6 +891,11 @@ func (pos *Position) getMask(kind int) Bitboard {
 		// Generate all non-attacks.
 		mask |= ^(pos.ByColor(White) | pos.ByColor(Black))
 	}
+	if pos.curr.IsCheckedKnown && pos.curr.IsChecked {
+		// If the king is in check we can only move to block or avoid the check.
+		king := pos.ByPiece(pos.Us(), King).AsSquare()
+		mask &= (pos.ByFigure(Knight) & bbKnightAttack[king]) | bbSuperAttack[king]
+	}
 	// Minor promotions and castling are handled specially.
 	return mask
 }
@@ -907,7 +937,8 @@ func (pos *Position) genKingMovesNear(mask Bitboard, moves *[]Move) {
 }
 
 func (pos *Position) genKingCastles(kind int, moves *[]Move) {
-	if kind&Quiet == 0 {
+	// Skip if we only generate violent or evasion moves.
+	if kind&Quiet == 0 || pos.curr.IsChecked {
 		return
 	}
 
@@ -1004,7 +1035,7 @@ func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	mask := pos.getMask(kind)
 	// Order of the moves is important because the last quiet
 	// moves will be reduced less.
-	pos.genPawnPromotions(kind, moves)
+	pos.genPawnPromotions(kind, mask, moves)
 	pos.genKingMovesNear(mask, moves)
 	pos.genKingCastles(kind, moves)
 	pos.genBishopMoves(Queen, mask, moves)
@@ -1013,7 +1044,7 @@ func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	pos.genBishopMoves(Bishop, mask, moves)
 	pos.genKnightMoves(mask, moves)
 	pos.genPawnDoubleAdvanceMoves(kind, moves)
-	pos.genPawnAdvanceMoves(kind, moves)
+	pos.genPawnAdvanceMoves(kind, mask, moves)
 	pos.genPawnAttackMoves(kind, moves)
 }
 
@@ -1024,10 +1055,10 @@ func (pos *Position) GenerateFigureMoves(fig Figure, kind int, moves *[]Move) {
 	mask := pos.getMask(kind)
 	switch fig {
 	case Pawn:
-		pos.genPawnAdvanceMoves(kind, moves)
+		pos.genPawnAdvanceMoves(kind, mask, moves)
 		pos.genPawnAttackMoves(kind, moves)
 		pos.genPawnDoubleAdvanceMoves(kind, moves)
-		pos.genPawnPromotions(kind, moves)
+		pos.genPawnPromotions(kind, mask, moves)
 	case Knight:
 		pos.genKnightMoves(mask, moves)
 	case Bishop:

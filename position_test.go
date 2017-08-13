@@ -405,12 +405,12 @@ func TestGenQueenMoves(t *testing.T) {
 func TestGenPawnAdvanceMoves(t *testing.T) {
 	var moves []Move
 	pos, _ := PositionFromFEN(testBoard1)
-	pos.genPawnAdvanceMoves(Violent|Quiet, &moves)
+	pos.genPawnAdvanceMoves(Violent|Quiet, BbFull, &moves)
 	testMoves(t, moves, []string{"d2d3", "e2e3", "e5e6"})
 
 	moves = moves[:0]
 	pos.DoMove(NullMove)
-	pos.genPawnAdvanceMoves(Violent|Quiet, &moves)
+	pos.genPawnAdvanceMoves(Violent|Quiet, BbFull, &moves)
 	testMoves(t, moves, []string{"d7d6", "e7e6", "f7f6"})
 }
 
