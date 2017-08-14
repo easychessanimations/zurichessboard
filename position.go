@@ -99,11 +99,6 @@ func (pos *Position) String() string {
 	return s
 }
 
-// prev returns state at previous ply.
-func (pos *Position) prev() *state {
-	return &pos.states[len(pos.states)-1]
-}
-
 // popState pops one ply.
 func (pos *Position) popState() {
 	len := len(pos.states) - 1
