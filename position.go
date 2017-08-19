@@ -1,7 +1,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package board provides functionlity to modify and to work with chess board.
+// Package board provides functionlity to modify and to work with a chess board.
 package board
 
 import (
@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// Violent indicates captures (inluding en passant) and queen promotions.
+	// Violent indicates captures (including en passant) and queen promotions.
 	Violent int = 1 << iota
 	// Quiet are all other moves including minor promotions and castling.
 	Quiet
