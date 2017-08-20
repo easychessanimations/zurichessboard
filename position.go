@@ -1003,8 +1003,7 @@ func (pos *Position) GetAttacker(sq Square, them Color) Figure {
 func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	mask := pos.getMask(kind)
 	// Order of the moves is important because the last quiet
-	// moves will be reduced less.  Current order was produced
-	// by testing 20 random orders and picking the best.
+	// moves will be reduced less.
 	pos.genPawnPromotions(kind, moves)
 	pos.genKingMovesNear(mask, moves)
 	pos.genKingCastles(kind, moves)
