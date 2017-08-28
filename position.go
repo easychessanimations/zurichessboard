@@ -718,7 +718,7 @@ func (pos *Position) UndoMove() {
 	pos.popState()
 }
 
-func (pos *Position) genPawnPromotions(kind int, mask Bitboard, moves *[]Move) {
+func (pos *Position) genPawnPromotions(kind int, moves *[]Move) {
 	// Minimum and maximum promotion pieces.
 	// Quiet -> Knight - Rook
 	// Violent -> Queen
@@ -754,13 +754,13 @@ func (pos *Position) genPawnPromotions(kind int, mask Bitboard, moves *[]Move) {
 				*moves = append(*moves, MakeMove(Promotion, from, to, NoPiece, ColorFigure(us, p)))
 			}
 		}
-		if to.File() != 0 && theirs.Has(to-1) && mask.Has(to-1) { // take west
+		if to.File() != 0 && theirs.Has(to-1) { // take west
 			capt := pos.Get(to - 1)
 			for p := pMin; p <= pMax; p++ {
 				*moves = append(*moves, MakeMove(Promotion, from, to-1, capt, ColorFigure(us, p)))
 			}
 		}
-		if to.File() != 7 && theirs.Has(to+1) && mask.Has(to+1) { // take east
+		if to.File() != 7 && theirs.Has(to+1) { // take east
 			capt := pos.Get(to + 1)
 			for p := pMin; p <= pMax; p++ {
 				*moves = append(*moves, MakeMove(Promotion, from, to+1, capt, ColorFigure(us, p)))
@@ -1035,7 +1035,7 @@ func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	mask := pos.getMask(kind)
 	// Order of the moves is important because the last quiet
 	// moves will be reduced less.
-	pos.genPawnPromotions(kind, mask, moves)
+	pos.genPawnPromotions(kind, moves)
 	pos.genKingMovesNear(mask, moves)
 	pos.genKingCastles(kind, moves)
 	pos.genBishopMoves(Queen, mask, moves)
@@ -1058,7 +1058,7 @@ func (pos *Position) GenerateFigureMoves(fig Figure, kind int, moves *[]Move) {
 		pos.genPawnAdvanceMoves(kind, mask, moves)
 		pos.genPawnAttackMoves(kind, moves)
 		pos.genPawnDoubleAdvanceMoves(kind, moves)
-		pos.genPawnPromotions(kind, mask, moves)
+		pos.genPawnPromotions(kind, moves)
 	case Knight:
 		pos.genKnightMoves(mask, moves)
 	case Bishop:

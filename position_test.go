@@ -804,25 +804,15 @@ func TestGenerateMovesKind(t *testing.T) {
 	for _, fen := range TestFENs {
 		pos, _ := PositionFromFEN(fen)
 
-		v := make(map[Move]int)
+		var moves []Move
 		for _, k := range []int{Violent, Quiet} {
-			var moves []Move
 			pos.GenerateMoves(k, &moves)
-			for _, m := range moves {
-				v[m] |= k
-			}
-		}
-
-		for m, k := range v {
-			if k != Violent && k != Quiet {
-				t.Errorf("invalid kind for move %v, fen %s", m, fen)
-			}
 		}
 
 		var all []Move
 		pos.GenerateMoves(Violent|Quiet, &all)
-		if len(all) != len(v) {
-			t.Errorf("Expected %d moves, got %d", len(all), len(v))
+		if len(all) != len(moves) {
+			t.Errorf("Expected %d moves, got %d for %s", len(all), len(moves), pos)
 		}
 	}
 }
