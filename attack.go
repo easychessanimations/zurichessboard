@@ -195,9 +195,9 @@ func (wiz *wizard) randMagic() uint64 {
 // mask is the attack set on empty board minus the border.
 func (wiz *wizard) mask(sq Square) Bitboard {
 	// Compute border. Trick source: stockfish.
-	border := (BbRank1 | BbRank8) & ^RankBb(sq.Rank())
-	border |= (BbFileA | BbFileH) & ^FileBb(sq.File())
-	return ^border & slidingAttack(sq, wiz.Deltas, BbEmpty)
+	border := (BbRank1 | BbRank8) &^ RankBb(sq.Rank())
+	border |= (BbFileA | BbFileH) &^ FileBb(sq.File())
+	return slidingAttack(sq, wiz.Deltas, BbEmpty) &^ border
 }
 
 // prepare computes reference and occupancy tables for a square.
@@ -280,70 +280,23 @@ func initRookMagic() {
 
 	// A set of known good magics for rook.
 	// Finding good rook magics is slow, so we just use some precomputed values.
-	wiz.SetMagic(rookMagic[:], SquareA1, 15024008494657323012, 12)
-	wiz.SetMagic(rookMagic[:], SquareA2, 15420465862145998980, 11)
-	wiz.SetMagic(rookMagic[:], SquareA3, 15420360858248675456, 11)
-	wiz.SetMagic(rookMagic[:], SquareA4, 15276350881835139072, 11)
-	wiz.SetMagic(rookMagic[:], SquareA5, 15312274192586506881, 11)
-	wiz.SetMagic(rookMagic[:], SquareA6, 15281135886646280192, 11)
-	wiz.SetMagic(rookMagic[:], SquareA7, 15278752145445224704, 11)
-	wiz.SetMagic(rookMagic[:], SquareA8, 14988014951518438155, 12)
-	wiz.SetMagic(rookMagic[:], SquareB1, 15294259519996137476, 11)
-	wiz.SetMagic(rookMagic[:], SquareB2, 15564722062066090240, 10)
-	wiz.SetMagic(rookMagic[:], SquareB3, 15569513459967402112, 10)
-	wiz.SetMagic(rookMagic[:], SquareB4, 15611798496353456256, 10)
-	wiz.SetMagic(rookMagic[:], SquareB5, 15565003446863020672, 10)
-	wiz.SetMagic(rookMagic[:], SquareB6, 15569401309730734208, 10)
-	wiz.SetMagic(rookMagic[:], SquareB7, 15567043958411395712, 10)
-	wiz.SetMagic(rookMagic[:], SquareB8, 15276491966412603401, 11)
-	wiz.SetMagic(rookMagic[:], SquareC1, 15312256325382045824, 11)
-	wiz.SetMagic(rookMagic[:], SquareC2, 15565144137081556992, 10)
-	wiz.SetMagic(rookMagic[:], SquareC3, 15636641393034924032, 10)
-	wiz.SetMagic(rookMagic[:], SquareC4, 15645507856414802208, 10)
-	wiz.SetMagic(rookMagic[:], SquareC5, 15576280971182350336, 10)
-	wiz.SetMagic(rookMagic[:], SquareC6, 15642200110987804696, 10)
-	wiz.SetMagic(rookMagic[:], SquareC7, 15618765395016335616, 10)
-	wiz.SetMagic(rookMagic[:], SquareC8, 15357283595238638210, 11)
-	wiz.SetMagic(rookMagic[:], SquareD1, 15348272069860659200, 11)
-	wiz.SetMagic(rookMagic[:], SquareD2, 15729384789340406272, 10)
-	wiz.SetMagic(rookMagic[:], SquareD3, 15637906381030330368, 10)
-	wiz.SetMagic(rookMagic[:], SquareD4, 15600486705692942592, 10)
-	wiz.SetMagic(rookMagic[:], SquareD5, 15636639777598484480, 10)
-	wiz.SetMagic(rookMagic[:], SquareD6, 15574028057900679176, 10)
-	wiz.SetMagic(rookMagic[:], SquareD7, 15641005904995287232, 10)
-	wiz.SetMagic(rookMagic[:], SquareD8, 15276773092490225730, 11)
-	wiz.SetMagic(rookMagic[:], SquareE1, 15420364777538454016, 11)
-	wiz.SetMagic(rookMagic[:], SquareE2, 15564721821532295425, 10)
-	wiz.SetMagic(rookMagic[:], SquareE3, 15742333597590290440, 10)
-	wiz.SetMagic(rookMagic[:], SquareE4, 15566693215813780488, 10)
-	wiz.SetMagic(rookMagic[:], SquareE5, 15708577492656719872, 10)
-	wiz.SetMagic(rookMagic[:], SquareE6, 15718143825794891828, 10)
-	wiz.SetMagic(rookMagic[:], SquareE7, 15569371622111969536, 10)
-	wiz.SetMagic(rookMagic[:], SquareE8, 15287750478839154689, 11)
-	wiz.SetMagic(rookMagic[:], SquareF1, 15420334615996466192, 11)
-	wiz.SetMagic(rookMagic[:], SquareF2, 15709118759527645200, 10)
-	wiz.SetMagic(rookMagic[:], SquareF3, 15564722887284762626, 10)
-	wiz.SetMagic(rookMagic[:], SquareF4, 15623059677267624064, 10)
-	wiz.SetMagic(rookMagic[:], SquareF5, 15619046700373525552, 10)
-	wiz.SetMagic(rookMagic[:], SquareF6, 15574010496028901381, 10)
-	wiz.SetMagic(rookMagic[:], SquareF7, 15727132917522563584, 10)
-	wiz.SetMagic(rookMagic[:], SquareF8, 15279024892104737794, 11)
-	wiz.SetMagic(rookMagic[:], SquareG1, 15276210512305588225, 11)
-	wiz.SetMagic(rookMagic[:], SquareG2, 15601032093541466148, 10)
-	wiz.SetMagic(rookMagic[:], SquareG3, 15564581599453392384, 10)
-	wiz.SetMagic(rookMagic[:], SquareG4, 15565020871512164417, 10)
-	wiz.SetMagic(rookMagic[:], SquareG5, 15564450286247383048, 10)
-	wiz.SetMagic(rookMagic[:], SquareG6, 15568380966301990932, 10)
-	wiz.SetMagic(rookMagic[:], SquareG7, 15601876767569346816, 10)
-	wiz.SetMagic(rookMagic[:], SquareG8, 15294376071855603844, 11)
-	wiz.SetMagic(rookMagic[:], SquareH1, 15060042870528442434, 12)
-	wiz.SetMagic(rookMagic[:], SquareH2, 15285357877078804608, 11)
-	wiz.SetMagic(rookMagic[:], SquareH3, 15278534303665902595, 11)
-	wiz.SetMagic(rookMagic[:], SquareH4, 15276350710036316416, 11)
-	wiz.SetMagic(rookMagic[:], SquareH5, 15276350674812539136, 11)
-	wiz.SetMagic(rookMagic[:], SquareH6, 15276211312644980745, 11)
-	wiz.SetMagic(rookMagic[:], SquareH7, 15276211059241959936, 11)
-	wiz.SetMagic(rookMagic[:], SquareH8, 15060041556272906338, 12)
+	magics := [SquareArraySize]struct {
+		square Square
+		magic  uint64
+		shift  uint
+	}{
+		{SquareA1, 15024008494657323012, 12}, {SquareA2, 15420465862145998980, 11}, {SquareA3, 15420360858248675456, 11}, {SquareA4, 15276350881835139072, 11}, {SquareA5, 15312274192586506881, 11}, {SquareA6, 15281135886646280192, 11}, {SquareA7, 15278752145445224704, 11}, {SquareA8, 14988014951518438155, 12},
+		{SquareB1, 15294259519996137476, 11}, {SquareB2, 15564722062066090240, 10}, {SquareB3, 15569513459967402112, 10}, {SquareB4, 15611798496353456256, 10}, {SquareB5, 15565003446863020672, 10}, {SquareB6, 15569401309730734208, 10}, {SquareB7, 15567043958411395712, 10}, {SquareB8, 15276491966412603401, 11},
+		{SquareC1, 15312256325382045824, 11}, {SquareC2, 15565144137081556992, 10}, {SquareC3, 15636641393034924032, 10}, {SquareC4, 15645507856414802208, 10}, {SquareC5, 15576280971182350336, 10}, {SquareC6, 15642200110987804696, 10}, {SquareC7, 15618765395016335616, 10}, {SquareC8, 15357283595238638210, 11},
+		{SquareD1, 15348272069860659200, 11}, {SquareD2, 15729384789340406272, 10}, {SquareD3, 15637906381030330368, 10}, {SquareD4, 15600486705692942592, 10}, {SquareD5, 15636639777598484480, 10}, {SquareD6, 15574028057900679176, 10}, {SquareD7, 15641005904995287232, 10}, {SquareD8, 15276773092490225730, 11},
+		{SquareE1, 15420364777538454016, 11}, {SquareE2, 15564721821532295425, 10}, {SquareE3, 15742333597590290440, 10}, {SquareE4, 15566693215813780488, 10}, {SquareE5, 15708577492656719872, 10}, {SquareE6, 15718143825794891828, 10}, {SquareE7, 15569371622111969536, 10}, {SquareE8, 15287750478839154689, 11},
+		{SquareF1, 15420334615996466192, 11}, {SquareF2, 15709118759527645200, 10}, {SquareF3, 15564722887284762626, 10}, {SquareF4, 15623059677267624064, 10}, {SquareF5, 15619046700373525552, 10}, {SquareF6, 15574010496028901381, 10}, {SquareF7, 15727132917522563584, 10}, {SquareF8, 15279024892104737794, 11},
+		{SquareG1, 15276210512305588225, 11}, {SquareG2, 15601032093541466148, 10}, {SquareG3, 15564581599453392384, 10}, {SquareG4, 15565020871512164417, 10}, {SquareG5, 15564450286247383048, 10}, {SquareG6, 15568380966301990932, 10}, {SquareG7, 15601876767569346816, 10}, {SquareG8, 15294376071855603844, 11},
+		{SquareH1, 15060042870528442434, 12}, {SquareH2, 15285357877078804608, 11}, {SquareH3, 15278534303665902595, 11}, {SquareH4, 15276350710036316416, 11}, {SquareH5, 15276350674812539136, 11}, {SquareH6, 15276211312644980745, 11}, {SquareH7, 15276211059241959936, 11}, {SquareH8, 15060041556272906338, 12},
+	}
+	for _, m := range magics {
+		wiz.SetMagic(rookMagic[:], m.square, m.magic, m.shift)
+	}
 
 	// Enable the next line to find new magics.
 	// wiz.searchMagic(rookMagic[:])
