@@ -40,20 +40,11 @@ var (
 
 	// Maps runes to figures.
 	symbolToFigure = map[rune]Figure{
-		'p': Pawn,
-		'n': Knight,
-		'b': Bishop,
-		'r': Rook,
-		'q': Queen,
-		'k': King,
-
-		'P': Pawn,
-		'N': Knight,
-		'B': Bishop,
-		'R': Rook,
-		'Q': Queen,
-		'K': King,
+		'p': Pawn, 'n': Knight, 'b': Bishop, 'r': Rook, 'q': Queen, 'k': King,
+		'P': Pawn, 'N': Knight, 'B': Bishop, 'R': Rook, 'Q': Queen, 'K': King,
 	}
+        // Maps pieces to symbols.
+        prettyPieceToSymbol = []string{".", "?", "♟", "♙", "♞", "♘", "♝", "♗", "♜", "♖", "♛", "♕", "♚", "♔"}
 )
 
 type state struct {
@@ -205,7 +196,7 @@ func (pos *Position) IsPseudoLegal(m Move) bool {
 		if m.MoveType() == Enpassant && !pos.IsEnpassantSquare(m.To()) {
 			return false
 		}
-		if BbPawnStartRank.Has(m.From()) && BbPawnDoubleRank.Has(m.To()) && !pos.IsEmpty((m.From()+m.To())/2) {
+		if BbPawnStartRank.Has(m.From()) && BbPawnDoubleRank.Has(m.To()) && pos.Get((m.From()+m.To())/2) != NoPiece {
 			return false
 		}
 		return true
@@ -235,30 +226,30 @@ func (pos *Position) IsPseudoLegal(m Move) bool {
 		// m.MoveType() == Castling
 		if m.Color() == White && m.To() == SquareG1 {
 			if pos.CastlingAbility()&WhiteOO == 0 ||
-				!pos.IsEmpty(SquareF1) || !pos.IsEmpty(SquareG1) {
+				pos.Get(SquareF1) != NoPiece || pos.Get(SquareG1) != NoPiece {
 				return false
 			}
 		}
 		if m.Color() == White && m.To() == SquareC1 {
 			if pos.CastlingAbility()&WhiteOOO == 0 ||
-				!pos.IsEmpty(SquareB1) ||
-				!pos.IsEmpty(SquareC1) ||
-				!pos.IsEmpty(SquareD1) {
+				pos.Get(SquareB1) != NoPiece ||
+				pos.Get(SquareC1) != NoPiece ||
+				pos.Get(SquareD1) != NoPiece {
 				return false
 			}
 		}
 		if m.Color() == Black && m.To() == SquareG8 {
 			if pos.CastlingAbility()&BlackOO == 0 ||
-				!pos.IsEmpty(SquareF8) ||
-				!pos.IsEmpty(SquareG8) {
+				pos.Get(SquareF8) != NoPiece ||
+				pos.Get(SquareG8) != NoPiece {
 				return false
 			}
 		}
 		if m.Color() == Black && m.To() == SquareC8 {
 			if pos.CastlingAbility()&BlackOOO == 0 ||
-				!pos.IsEmpty(SquareB8) ||
-				!pos.IsEmpty(SquareC8) ||
-				!pos.IsEmpty(SquareD8) {
+				pos.Get(SquareB8) != NoPiece ||
+				pos.Get(SquareC8) != NoPiece ||
+				pos.Get(SquareD8) != NoPiece {
 				return false
 			}
 		}
@@ -318,7 +309,7 @@ func (pos *Position) Verify() error {
 	}
 
 	// Verifies that en passant square is empty.
-	if sq := pos.curr.EnpassantSquare; sq != SquareA1 && !pos.IsEmpty(sq) {
+	if sq := pos.curr.EnpassantSquare; sq != SquareA1 && pos.Get(sq) != NoPiece {
 		return fmt.Errorf("Expected empty en passant square %v, got %v", sq, pos.Get(sq))
 	}
 
@@ -416,12 +407,6 @@ func (pos *Position) Remove(sq Square, pi Piece) {
 		pos.curr.ByFigure[pi.Figure()] &= bb
 		pos.pieces[sq] = NoPiece
 	}
-}
-
-// IsEmpty returns true if there is no piece at sq.
-// TODO Remove. Get() is constant time now.
-func (pos *Position) IsEmpty(sq Square) bool {
-	return pos.Get(sq) == NoPiece
 }
 
 // Get returns the piece at sq.
@@ -574,8 +559,6 @@ func (pos *Position) GivesCheck(m Move) bool {
 	return false
 }
 
-var prettyPieceToSymbol = []string{".", "?", "♟", "♙", "♞", "♘", "♝", "♗", "♜", "♖", "♛", "♕", "♚", "♔"}
-
 // PrettyPrint pretty prints the current position to log.
 func (pos *Position) PrettyPrint() {
 	log.Println("zobrist =", pos.Zobrist())
@@ -590,15 +573,11 @@ func (pos *Position) PrettyPrint() {
 				line += prettyPieceToSymbol[pos.Get(sq)]
 			}
 		}
-		if r == 7 && pos.Us() == Black {
-			line += " *"
-		}
-		if r == 0 && pos.Us() == White {
+		if r == HomeRank(pos.Us()) {
 			line += " *"
 		}
 		log.Println(line)
 	}
-
 }
 
 // UCIToMove parses a move given in UCI format.
@@ -952,7 +931,7 @@ func (pos *Position) genKingCastles(kind int, moves *[]Move) {
 	if pos.curr.CastlingAbility&oo != 0 {
 		r5 := RankFile(rank, 5)
 		r6 := RankFile(rank, 6)
-		if !pos.IsEmpty(r5) || !pos.IsEmpty(r6) {
+		if pos.Get(r5) != NoPiece || pos.Get(r6) != NoPiece {
 			goto EndCastleOO
 		}
 
@@ -972,7 +951,7 @@ EndCastleOO:
 		r3 := RankFile(rank, 3)
 		r2 := RankFile(rank, 2)
 		r1 := RankFile(rank, 1)
-		if !pos.IsEmpty(r3) || !pos.IsEmpty(r2) || !pos.IsEmpty(r1) {
+		if pos.Get(r3) != NoPiece || pos.Get(r2) != NoPiece || pos.Get(r1) != NoPiece {
 			goto EndCastleOOO
 		}
 
