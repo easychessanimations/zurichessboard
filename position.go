@@ -25,7 +25,14 @@ var (
 	FENStartPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 	// Which castle rights are lost when pieces are moved.
-	lostCastleRights [64]Castle
+	lostCastleRights = [64]Castle{
+		SquareA1: WhiteOOO,
+		SquareE1: WhiteOOO | WhiteOO,
+		SquareH1: WhiteOO,
+		SquareA8: BlackOOO,
+		SquareE8: BlackOOO | BlackOO,
+		SquareH8: BlackOO,
+	}
 
 	// The zobrist* arrays contain magic numbers used for Zobrist hashing.
 	// More information on Zobrist hashing can be found in the paper:
@@ -39,7 +46,7 @@ var (
 	zobristColor     [ColorArraySize]uint64
 
 	// Maps runes to figures.
-	symbolToFigure = map[rune]Figure{
+	symbolToFigure = [256]Figure{
 		'p': Pawn, 'n': Knight, 'b': Bishop, 'r': Rook, 'q': Queen, 'k': King,
 		'P': Pawn, 'N': Knight, 'B': Bishop, 'R': Rook, 'Q': Queen, 'K': King,
 	}
@@ -605,7 +612,7 @@ func (pos *Position) UCIToMove(s string) (Move, error) {
 			return NullMove, fmt.Errorf("%s doesn't have a promotion piece", s)
 		}
 		moveType = Promotion
-		target = ColorFigure(pos.Us(), symbolToFigure[rune(s[4])])
+		target = ColorFigure(pos.Us(), symbolToFigure[s[4]])
 	} else {
 		if len(s) != 4 {
 			return NullMove, fmt.Errorf("%s move is too long", s)
@@ -1043,13 +1050,6 @@ func (pos *Position) GenerateFigureMoves(fig Figure, kind int, moves *[]Move) {
 }
 
 func init() {
-	lostCastleRights[SquareA1] = WhiteOOO
-	lostCastleRights[SquareE1] = WhiteOOO | WhiteOO
-	lostCastleRights[SquareH1] = WhiteOO
-	lostCastleRights[SquareA8] = BlackOOO
-	lostCastleRights[SquareE8] = BlackOOO | BlackOO
-	lostCastleRights[SquareH8] = BlackOO
-
 	r := rand.New(rand.NewSource(5))
 	f := func() uint64 { return uint64(r.Int63())<<32 ^ uint64(r.Int63()) }
 	initZobristPiece(f)
