@@ -766,14 +766,14 @@ func (pos *Position) genPawnAdvanceMoves(kind int, mask Bitboard, moves *[]Move)
 
 	for ours != 0 {
 		from := ours.Pop()
-                to := from + forward
+		to := from + forward
 		if mask.Has(to) {
 			*moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
 		}
-                to += forward
-                if mask.Has(to) && from.Rank() == HomeRank(pos.Us())^1 && !occu.Has(to) {
-                        *moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
-                }
+		to += forward
+		if mask.Has(to) && from.Rank() == HomeRank(pos.Us())^1 && !occu.Has(to) {
+			*moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
+		}
 	}
 }
 
@@ -854,40 +854,26 @@ func (pos *Position) getMask(kind int) Bitboard {
 	return mask
 }
 
-func (pos *Position) genKnightMoves(mask Bitboard, moves *[]Move) {
-	pi := ColorFigure(pos.Us(), Knight)
-	for bb := pos.ByPiece(pos.Us(), Knight); bb != 0; {
-		from := bb.Pop()
-		att := bbKnightAttack[from] & mask
-		pos.genBitboardMoves(pi, from, att, moves)
-	}
-}
-
-func (pos *Position) genBishopMoves(fig Figure, mask Bitboard, moves *[]Move) {
+func (pos *Position) genPieceMoves(fig Figure, mask Bitboard, moves *[]Move) {
 	pi := ColorFigure(pos.Us(), fig)
-	ref := pos.ByColor(White) | pos.ByColor(Black)
+	all := pos.ByColor(White) | pos.ByColor(Black)
 	for bb := pos.ByPiece(pos.Us(), fig); bb != 0; {
 		from := bb.Pop()
-		att := bishopMagic[from].Attack(ref) & mask
-		pos.genBitboardMoves(pi, from, att, moves)
+		var att Bitboard
+		switch fig {
+		case Knight:
+			att = KnightMobility(from)
+		case Bishop:
+			att = BishopMobility(from, all)
+		case Rook:
+			att = RookMobility(from, all)
+		case Queen:
+			att = QueenMobility(from, all)
+		case King:
+			att = KingMobility(from)
+		}
+		pos.genBitboardMoves(pi, from, att&mask, moves)
 	}
-}
-
-func (pos *Position) genRookMoves(fig Figure, mask Bitboard, moves *[]Move) {
-	pi := ColorFigure(pos.Us(), fig)
-	ref := pos.ByColor(White) | pos.ByColor(Black)
-	for bb := pos.ByPiece(pos.Us(), fig); bb != 0; {
-		from := bb.Pop()
-		att := rookMagic[from].Attack(ref) & mask
-		pos.genBitboardMoves(pi, from, att, moves)
-	}
-}
-
-func (pos *Position) genKingMovesNear(mask Bitboard, moves *[]Move) {
-	pi := ColorFigure(pos.Us(), King)
-	from := pos.ByPiece(pos.Us(), King).AsSquare()
-	att := bbKingAttack[from] & mask
-	pos.genBitboardMoves(pi, from, att, moves)
 }
 
 func (pos *Position) genKingCastles(kind int, moves *[]Move) {
@@ -990,13 +976,12 @@ func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	// Order of the moves is important because the last quiet
 	// moves will be reduced less.
 	pos.genPawnPromotions(kind, moves)
-	pos.genKingMovesNear(mask, moves)
+	pos.genPieceMoves(King, mask, moves)
 	pos.genKingCastles(kind, moves)
-	pos.genBishopMoves(Queen, mask, moves)
-	pos.genRookMoves(Queen, mask, moves)
-	pos.genRookMoves(Rook, mask, moves)
-	pos.genBishopMoves(Bishop, mask, moves)
-	pos.genKnightMoves(mask, moves)
+	pos.genPieceMoves(Queen, mask, moves)
+	pos.genPieceMoves(Rook, mask, moves)
+	pos.genPieceMoves(Bishop, mask, moves)
+	pos.genPieceMoves(Knight, mask, moves)
 	pos.genPawnAdvanceMoves(kind, mask, moves)
 	pos.genPawnAttackMoves(kind, moves)
 }
@@ -1012,16 +997,15 @@ func (pos *Position) GenerateFigureMoves(fig Figure, kind int, moves *[]Move) {
 		pos.genPawnAttackMoves(kind, moves)
 		pos.genPawnPromotions(kind, moves)
 	case Knight:
-		pos.genKnightMoves(mask, moves)
+		pos.genPieceMoves(Knight, mask, moves)
 	case Bishop:
-		pos.genBishopMoves(Bishop, mask, moves)
+		pos.genPieceMoves(Bishop, mask, moves)
 	case Rook:
-		pos.genRookMoves(Rook, mask, moves)
+		pos.genPieceMoves(Rook, mask, moves)
 	case Queen:
-		pos.genBishopMoves(Queen, mask, moves)
-		pos.genRookMoves(Queen, mask, moves)
+		pos.genPieceMoves(Queen, mask, moves)
 	case King:
-		pos.genKingMovesNear(mask, moves)
+		pos.genPieceMoves(King, mask, moves)
 		pos.genKingCastles(kind, moves)
 	}
 }

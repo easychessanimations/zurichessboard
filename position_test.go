@@ -72,32 +72,31 @@ func (te *testEngine) Pawn(sq Square, expected []string) {
 
 func (te *testEngine) Knight(expected []string) {
 	var actual []Move
-	te.Pos.genKnightMoves(te.Pos.getMask(Violent|Quiet), &actual)
+	te.Pos.genPieceMoves(Knight, te.Pos.getMask(Violent|Quiet), &actual)
 	testMoves(te.T, actual, expected)
 }
 
 func (te *testEngine) Bishop(expected []string) {
 	var actual []Move
-	te.Pos.genBishopMoves(Bishop, te.Pos.getMask(Violent|Quiet), &actual)
+	te.Pos.genPieceMoves(Bishop, te.Pos.getMask(Violent|Quiet), &actual)
 	testMoves(te.T, actual, expected)
 }
 
 func (te *testEngine) Rook(expected []string) {
 	var actual []Move
-	te.Pos.genRookMoves(Rook, te.Pos.getMask(Violent|Quiet), &actual)
+	te.Pos.genPieceMoves(Rook, te.Pos.getMask(Violent|Quiet), &actual)
 	testMoves(te.T, actual, expected)
 }
 
 func (te *testEngine) Queen(expected []string) {
 	var actual []Move
-	te.Pos.genBishopMoves(Queen, te.Pos.getMask(Violent|Quiet), &actual)
-	te.Pos.genRookMoves(Queen, te.Pos.getMask(Violent|Quiet), &actual)
+	te.Pos.genPieceMoves(Queen, te.Pos.getMask(Violent|Quiet), &actual)
 	testMoves(te.T, actual, expected)
 }
 
 func (te *testEngine) King(expected []string) {
 	var actual []Move
-	te.Pos.genKingMovesNear(te.Pos.getMask(Violent|Quiet), &actual)
+	te.Pos.genPieceMoves(King, te.Pos.getMask(Violent|Quiet), &actual)
 	te.Pos.genKingCastles(Violent|Quiet, &actual)
 	testMoves(te.T, actual, expected)
 }
