@@ -744,8 +744,8 @@ func (pos *Position) genPawnPromotions(kind int, moves *[]Move) {
 	}
 }
 
-// genPawnAdvanceMoves moves pawns one square.
-// Does not generate promotions.
+// genPawnAdvanceMoves moves pawns forward one or two squares.
+// Does not generate promotions nor attacks.
 func (pos *Position) genPawnAdvanceMoves(kind int, mask Bitboard, moves *[]Move) {
 	if kind&Quiet == 0 {
 		return
@@ -766,35 +766,14 @@ func (pos *Position) genPawnAdvanceMoves(kind int, mask Bitboard, moves *[]Move)
 
 	for ours != 0 {
 		from := ours.Pop()
-		if to := from + forward; mask.Has(to) {
+                to := from + forward
+		if mask.Has(to) {
 			*moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
 		}
-	}
-}
-
-// genPawnDoubleAdvanceMoves moves pawns two square.
-func (pos *Position) genPawnDoubleAdvanceMoves(kind int, moves *[]Move) {
-	if kind&Quiet == 0 {
-		return
-	}
-
-	ours := pos.ByPiece(pos.Us(), Pawn)
-	occu := pos.ByColor(White) | pos.ByColor(Black)
-	pawn := ColorFigure(pos.Us(), Pawn)
-
-	var forward Square
-	if pos.Us() == White {
-		ours &= RankBb(1) &^ South(occu) &^ South(South(occu))
-		forward = RankFile(+2, 0)
-	} else {
-		ours &= RankBb(6) &^ North(occu) &^ North(North(occu))
-		forward = RankFile(-2, 0)
-	}
-
-	for ours != 0 {
-		from := ours.Pop()
-		to := from + forward
-		*moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
+                to += forward
+                if mask.Has(to) && from.Rank() == HomeRank(pos.Us())^1 && !occu.Has(to) {
+                        *moves = append(*moves, MakeMove(Normal, from, to, NoPiece, pawn))
+                }
 	}
 }
 
@@ -1018,7 +997,6 @@ func (pos *Position) GenerateMoves(kind int, moves *[]Move) {
 	pos.genRookMoves(Rook, mask, moves)
 	pos.genBishopMoves(Bishop, mask, moves)
 	pos.genKnightMoves(mask, moves)
-	pos.genPawnDoubleAdvanceMoves(kind, moves)
 	pos.genPawnAdvanceMoves(kind, mask, moves)
 	pos.genPawnAttackMoves(kind, moves)
 }
@@ -1032,7 +1010,6 @@ func (pos *Position) GenerateFigureMoves(fig Figure, kind int, moves *[]Move) {
 	case Pawn:
 		pos.genPawnAdvanceMoves(kind, mask, moves)
 		pos.genPawnAttackMoves(kind, moves)
-		pos.genPawnDoubleAdvanceMoves(kind, moves)
 		pos.genPawnPromotions(kind, moves)
 	case Knight:
 		pos.genKnightMoves(mask, moves)

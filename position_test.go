@@ -406,24 +406,12 @@ func TestGenPawnAdvanceMoves(t *testing.T) {
 	var moves []Move
 	pos, _ := PositionFromFEN(testBoard1)
 	pos.genPawnAdvanceMoves(Violent|Quiet, BbFull, &moves)
-	testMoves(t, moves, []string{"d2d3", "e2e3", "e5e6"})
+	testMoves(t, moves, []string{"d2d3", "e2e3", "e5e6", "d2d4", "e2e4"})
 
 	moves = moves[:0]
 	pos.DoMove(NullMove)
 	pos.genPawnAdvanceMoves(Violent|Quiet, BbFull, &moves)
-	testMoves(t, moves, []string{"d7d6", "e7e6", "f7f6"})
-}
-
-func TestGenPawnDoubleAdvanceMoves(t *testing.T) {
-	var moves []Move
-	pos, _ := PositionFromFEN(testBoard1)
-	pos.genPawnDoubleAdvanceMoves(Violent|Quiet, &moves)
-	testMoves(t, moves, []string{"d2d4", "e2e4"})
-
-	moves = moves[:0]
-	pos.DoMove(NullMove)
-	pos.genPawnDoubleAdvanceMoves(Violent|Quiet, &moves)
-	testMoves(t, moves, []string{"d7d5", "f7f5"})
+	testMoves(t, moves, []string{"d7d6", "e7e6", "f7f6", "d7d5", "f7f5"})
 }
 
 func TestGenPawnAttackMoves1(t *testing.T) {
