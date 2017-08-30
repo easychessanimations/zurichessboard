@@ -43,8 +43,8 @@ var (
 		'p': Pawn, 'n': Knight, 'b': Bishop, 'r': Rook, 'q': Queen, 'k': King,
 		'P': Pawn, 'N': Knight, 'B': Bishop, 'R': Rook, 'Q': Queen, 'K': King,
 	}
-        // Maps pieces to symbols.
-        prettyPieceToSymbol = []string{".", "?", "♟", "♙", "♞", "♘", "♝", "♗", "♜", "♖", "♛", "♕", "♚", "♔"}
+	// Maps pieces to symbols.
+	prettyPieceToSymbol = []string{".", "?", "♟", "♙", "♞", "♘", "♝", "♗", "♜", "♖", "♛", "♕", "♚", "♔"}
 )
 
 type state struct {
@@ -223,33 +223,26 @@ func (pos *Position) IsPseudoLegal(m Move) bool {
 			return bbKingAttack[from].Has(to)
 		}
 
+		// King must be castling, final square is empty.
 		// m.MoveType() == Castling
+
 		if m.Color() == White && m.To() == SquareG1 {
-			if pos.CastlingAbility()&WhiteOO == 0 ||
-				pos.Get(SquareF1) != NoPiece || pos.Get(SquareG1) != NoPiece {
+			if pos.CastlingAbility()&WhiteOO == 0 || all.Has(SquareF1) {
 				return false
 			}
 		}
 		if m.Color() == White && m.To() == SquareC1 {
-			if pos.CastlingAbility()&WhiteOOO == 0 ||
-				pos.Get(SquareB1) != NoPiece ||
-				pos.Get(SquareC1) != NoPiece ||
-				pos.Get(SquareD1) != NoPiece {
+			if pos.CastlingAbility()&WhiteOOO == 0 || all.Has(SquareD1) || all.Has(SquareB1) {
 				return false
 			}
 		}
 		if m.Color() == Black && m.To() == SquareG8 {
-			if pos.CastlingAbility()&BlackOO == 0 ||
-				pos.Get(SquareF8) != NoPiece ||
-				pos.Get(SquareG8) != NoPiece {
+			if pos.CastlingAbility()&BlackOO == 0 || all.Has(SquareF8) {
 				return false
 			}
 		}
 		if m.Color() == Black && m.To() == SquareC8 {
-			if pos.CastlingAbility()&BlackOOO == 0 ||
-				pos.Get(SquareB8) != NoPiece ||
-				pos.Get(SquareC8) != NoPiece ||
-				pos.Get(SquareD8) != NoPiece {
+			if pos.CastlingAbility()&BlackOOO == 0 || all.Has(SquareD8) || all.Has(SquareB8) {
 				return false
 			}
 		}
