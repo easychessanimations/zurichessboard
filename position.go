@@ -316,10 +316,6 @@ func (pos *Position) Verify() error {
 
 // SetCastlingAbility sets the side to move, correctly updating the Zobrist key.
 func (pos *Position) SetCastlingAbility(castle Castle) {
-	if pos.curr.CastlingAbility == castle {
-		return
-	}
-
 	pos.curr.Zobrist ^= zobristCastle[pos.curr.CastlingAbility]
 	pos.curr.CastlingAbility = castle
 	pos.curr.Zobrist ^= zobristCastle[pos.curr.CastlingAbility]
