@@ -128,7 +128,7 @@ func spell(magic uint64, bb Bitboard) uint {
 
 type magicInfo struct {
 	mask  Bitboard   // square's mask.
-	magic uint64     // magic multiplier. first 4 bits are the shift.
+	magic uint64     // magic multiplier. first 6 bits are 64-shift.
 	store []Bitboard // attack boards of size 1<<shift
 }
 
@@ -153,8 +153,9 @@ type wizard struct {
 	occupancy []Bitboard
 }
 
-func (wiz *wizard) tryMagicNumber(mi *magicInfo, sq Square, magic uint64, shift uint) bool {
+func (wiz *wizard) tryMagicNumber(mi *magicInfo, sq Square, magic uint64) bool {
 	wiz.numMagicTests++
+	shift := 64 - uint(magic>>58)
 
 	// Clear store.
 	if len(wiz.store) < 1<<shift {
@@ -242,7 +243,7 @@ func (wiz *wizard) searchSquareMagic(sq Square, mi *magicInfo) {
 		for popcnt(uint64(mask)*magic) < 8 {
 			magic = wiz.randMagic()>>6 + uint64(64-shift)<<58
 		}
-		wiz.tryMagicNumber(mi, sq, magic, shift)
+		wiz.tryMagicNumber(mi, sq, magic)
 	}
 }
 
@@ -262,10 +263,10 @@ func (wiz *wizard) searchMagic(mi []magicInfo) {
 	}
 }
 
-func (wiz *wizard) SetMagic(mi []magicInfo, sq Square, magic uint64, shift uint) {
+func (wiz *wizard) SetMagic(mi []magicInfo, sq Square, magic uint64) {
 	wiz.prepare(sq)
-	if !wiz.tryMagicNumber(&mi[sq], sq, magic, shift) {
-		panic(fmt.Sprintf("invalid magic: sq=%v magic=%d shift=%d", sq, magic, shift))
+	if !wiz.tryMagicNumber(&mi[sq], sq, magic) {
+		panic(fmt.Sprintf("invalid magic: sq=%v magic=%d shift=%d", sq, magic))
 	}
 }
 
@@ -283,19 +284,18 @@ func initRookMagic() {
 	magics := [SquareArraySize]struct {
 		square Square
 		magic  uint64
-		shift  uint
 	}{
-		{SquareA1, 15024008494657323012, 12}, {SquareA2, 15420465862145998980, 11}, {SquareA3, 15420360858248675456, 11}, {SquareA4, 15276350881835139072, 11}, {SquareA5, 15312274192586506881, 11}, {SquareA6, 15281135886646280192, 11}, {SquareA7, 15278752145445224704, 11}, {SquareA8, 14988014951518438155, 12},
-		{SquareB1, 15294259519996137476, 11}, {SquareB2, 15564722062066090240, 10}, {SquareB3, 15569513459967402112, 10}, {SquareB4, 15611798496353456256, 10}, {SquareB5, 15565003446863020672, 10}, {SquareB6, 15569401309730734208, 10}, {SquareB7, 15567043958411395712, 10}, {SquareB8, 15276491966412603401, 11},
-		{SquareC1, 15312256325382045824, 11}, {SquareC2, 15565144137081556992, 10}, {SquareC3, 15636641393034924032, 10}, {SquareC4, 15645507856414802208, 10}, {SquareC5, 15576280971182350336, 10}, {SquareC6, 15642200110987804696, 10}, {SquareC7, 15618765395016335616, 10}, {SquareC8, 15357283595238638210, 11},
-		{SquareD1, 15348272069860659200, 11}, {SquareD2, 15729384789340406272, 10}, {SquareD3, 15637906381030330368, 10}, {SquareD4, 15600486705692942592, 10}, {SquareD5, 15636639777598484480, 10}, {SquareD6, 15574028057900679176, 10}, {SquareD7, 15641005904995287232, 10}, {SquareD8, 15276773092490225730, 11},
-		{SquareE1, 15420364777538454016, 11}, {SquareE2, 15564721821532295425, 10}, {SquareE3, 15742333597590290440, 10}, {SquareE4, 15566693215813780488, 10}, {SquareE5, 15708577492656719872, 10}, {SquareE6, 15718143825794891828, 10}, {SquareE7, 15569371622111969536, 10}, {SquareE8, 15287750478839154689, 11},
-		{SquareF1, 15420334615996466192, 11}, {SquareF2, 15709118759527645200, 10}, {SquareF3, 15564722887284762626, 10}, {SquareF4, 15623059677267624064, 10}, {SquareF5, 15619046700373525552, 10}, {SquareF6, 15574010496028901381, 10}, {SquareF7, 15727132917522563584, 10}, {SquareF8, 15279024892104737794, 11},
-		{SquareG1, 15276210512305588225, 11}, {SquareG2, 15601032093541466148, 10}, {SquareG3, 15564581599453392384, 10}, {SquareG4, 15565020871512164417, 10}, {SquareG5, 15564450286247383048, 10}, {SquareG6, 15568380966301990932, 10}, {SquareG7, 15601876767569346816, 10}, {SquareG8, 15294376071855603844, 11},
-		{SquareH1, 15060042870528442434, 12}, {SquareH2, 15285357877078804608, 11}, {SquareH3, 15278534303665902595, 11}, {SquareH4, 15276350710036316416, 11}, {SquareH5, 15276350674812539136, 11}, {SquareH6, 15276211312644980745, 11}, {SquareH7, 15276211059241959936, 11}, {SquareH8, 15060041556272906338, 12},
+		{SquareA1, 15024008494657323012}, {SquareA2, 15420465862145998980}, {SquareA3, 15420360858248675456}, {SquareA4, 15276350881835139072}, {SquareA5, 15312274192586506881}, {SquareA6, 15281135886646280192}, {SquareA7, 15278752145445224704}, {SquareA8, 14988014951518438155},
+		{SquareB1, 15294259519996137476}, {SquareB2, 15564722062066090240}, {SquareB3, 15569513459967402112}, {SquareB4, 15611798496353456256}, {SquareB5, 15565003446863020672}, {SquareB6, 15569401309730734208}, {SquareB7, 15567043958411395712}, {SquareB8, 15276491966412603401},
+		{SquareC1, 15312256325382045824}, {SquareC2, 15565144137081556992}, {SquareC3, 15636641393034924032}, {SquareC4, 15645507856414802208}, {SquareC5, 15576280971182350336}, {SquareC6, 15642200110987804696}, {SquareC7, 15618765395016335616}, {SquareC8, 15357283595238638210},
+		{SquareD1, 15348272069860659200}, {SquareD2, 15729384789340406272}, {SquareD3, 15637906381030330368}, {SquareD4, 15600486705692942592}, {SquareD5, 15636639777598484480}, {SquareD6, 15574028057900679176}, {SquareD7, 15641005904995287232}, {SquareD8, 15276773092490225730},
+		{SquareE1, 15420364777538454016}, {SquareE2, 15564721821532295425}, {SquareE3, 15742333597590290440}, {SquareE4, 15566693215813780488}, {SquareE5, 15708577492656719872}, {SquareE6, 15718143825794891828}, {SquareE7, 15569371622111969536}, {SquareE8, 15287750478839154689},
+		{SquareF1, 15420334615996466192}, {SquareF2, 15709118759527645200}, {SquareF3, 15564722887284762626}, {SquareF4, 15623059677267624064}, {SquareF5, 15619046700373525552}, {SquareF6, 15574010496028901381}, {SquareF7, 15727132917522563584}, {SquareF8, 15279024892104737794},
+		{SquareG1, 15276210512305588225}, {SquareG2, 15601032093541466148}, {SquareG3, 15564581599453392384}, {SquareG4, 15565020871512164417}, {SquareG5, 15564450286247383048}, {SquareG6, 15568380966301990932}, {SquareG7, 15601876767569346816}, {SquareG8, 15294376071855603844},
+		{SquareH1, 15060042870528442434}, {SquareH2, 15285357877078804608}, {SquareH3, 15278534303665902595}, {SquareH4, 15276350710036316416}, {SquareH5, 15276350674812539136}, {SquareH6, 15276211312644980745}, {SquareH7, 15276211059241959936}, {SquareH8, 15060041556272906338},
 	}
 	for _, m := range magics {
-		wiz.SetMagic(rookMagic[:], m.square, m.magic, m.shift)
+		wiz.SetMagic(rookMagic[:], m.square, m.magic)
 	}
 
 	// Enable the next line to find new magics.
