@@ -266,7 +266,7 @@ func (wiz *wizard) searchMagic(mi []magicInfo) {
 func (wiz *wizard) SetMagic(mi []magicInfo, sq Square, magic uint64) {
 	wiz.prepare(sq)
 	if !wiz.tryMagicNumber(&mi[sq], sq, magic) {
-		panic(fmt.Sprintf("invalid magic: sq=%v magic=%d shift=%d", sq, magic))
+		panic(fmt.Sprintf("invalid magic: sq=%v magic=%d", sq, magic))
 	}
 }
 
