@@ -361,22 +361,22 @@ func (pos *Position) SetEnpassantSquare(epsq Square) {
 	pos.curr.Zobrist ^= zobristEnpassant[pos.curr.EnpassantSquare]
 }
 
-// ByPiece is a shortcut for ByColor[col]&ByFigure[fig].
+// ByColor returns the bitboard occupied by color col.
 func (pos *Position) ByColor(col Color) Bitboard {
 	return pos.curr.ByColor[col]
 }
 
-// ByPiece is a shortcut for ByColor[col]&ByFigure[fig].
+// ByFigure returns the bitboard occupied by figure fig.
 func (pos *Position) ByFigure(fig Figure) Bitboard {
 	return pos.curr.ByFigure[fig]
 }
 
-// ByPiece is a shortcut for ByColor[col]&ByFigure[fig].
+// ByPiece is a shortcut for ByColor(col)&ByFigure(fig).
 func (pos *Position) ByPiece(col Color, fig Figure) Bitboard {
 	return pos.ByColor(col) & pos.ByFigure(fig)
 }
 
-// ByPiece2 is a shortcut for ByColor[col]&(ByFigure[fig0]|ByFigure[fig1])
+// ByPiece2 is a shortcut for ByColor(col)&(ByFigure(fig0)|ByFigure(fig1))
 func (pos *Position) ByPiece2(col Color, fig0, fig1 Figure) Bitboard {
 	return pos.ByColor(col) & (pos.ByFigure(fig0) | pos.ByFigure(fig1))
 }
@@ -507,7 +507,7 @@ func (pos *Position) GivesCheck(m Move) bool {
 	pos.curr.GivesCheckMove = m
 	pos.curr.GivesCheckResult = true
 
-	// Test pawn advance gives check.
+	// Test whether pawn advance gives check.
 	if fig == Pawn {
 		bb := Forward(us, m.To().Bitboard())
 		bb = East(bb) | West(bb)
@@ -515,7 +515,7 @@ func (pos *Position) GivesCheck(m Move) bool {
 			return true
 		}
 	}
-	// Test if knight move gives check.
+	// Test whether the knight move gives check.
 	// There is no such thing as discovered knight check so the check must be from this move.
 	if fig == Knight && KnightMobility(m.To())&king != 0 {
 		return true
@@ -892,50 +892,38 @@ func (pos *Position) genKingCastles(kind int, moves *[]Move) {
 	if pos.curr.CastlingAbility&oo != 0 {
 		r5 := RankFile(rank, 5)
 		r6 := RankFile(rank, 6)
-		if pos.Get(r5) != NoPiece || pos.Get(r6) != NoPiece {
-			goto EndCastleOO
+		if pos.Get(r5) == NoPiece && pos.Get(r6) == NoPiece {
+			r4 := RankFile(rank, 4)
+			if pos.GetAttacker(r4, pos.Them()) == NoFigure &&
+				pos.GetAttacker(r5, pos.Them()) == NoFigure &&
+				pos.GetAttacker(r6, pos.Them()) == NoFigure {
+				*moves = append(*moves, MakeMove(Castling, r4, r6, NoPiece, ColorFigure(pos.Us(), King)))
+			}
 		}
-
-		r4 := RankFile(rank, 4)
-		if pos.GetAttacker(r4, pos.Them()) != NoFigure ||
-			pos.GetAttacker(r5, pos.Them()) != NoFigure ||
-			pos.GetAttacker(r6, pos.Them()) != NoFigure {
-			goto EndCastleOO
-		}
-
-		*moves = append(*moves, MakeMove(Castling, r4, r6, NoPiece, ColorFigure(pos.Us(), King)))
 	}
-EndCastleOO:
 
 	// Castle queen side.
 	if pos.curr.CastlingAbility&ooo != 0 {
 		r3 := RankFile(rank, 3)
 		r2 := RankFile(rank, 2)
 		r1 := RankFile(rank, 1)
-		if pos.Get(r3) != NoPiece || pos.Get(r2) != NoPiece || pos.Get(r1) != NoPiece {
-			goto EndCastleOOO
+		if pos.Get(r3) == NoPiece && pos.Get(r2) == NoPiece && pos.Get(r1) == NoPiece {
+			r4 := RankFile(rank, 4)
+			if pos.GetAttacker(r4, pos.Them()) == NoFigure &&
+				pos.GetAttacker(r3, pos.Them()) == NoFigure &&
+				pos.GetAttacker(r2, pos.Them()) == NoFigure {
+				*moves = append(*moves, MakeMove(Castling, r4, r2, NoPiece, ColorFigure(pos.Us(), King)))
+			}
 		}
-
-		r4 := RankFile(rank, 4)
-		if pos.GetAttacker(r4, pos.Them()) != NoFigure ||
-			pos.GetAttacker(r3, pos.Them()) != NoFigure ||
-			pos.GetAttacker(r2, pos.Them()) != NoFigure {
-			goto EndCastleOOO
-		}
-
-		*moves = append(*moves, MakeMove(Castling, r4, r2, NoPiece, ColorFigure(pos.Us(), King)))
 	}
-EndCastleOOO:
 }
 
 // GetAttacker returns the smallest figure of color them that attacks sq.
 func (pos *Position) GetAttacker(sq Square, them Color) Figure {
 	enemy := pos.ByColor(them)
-	// Pawn
 	if PawnThreats(pos, them).Has(sq) {
 		return Pawn
 	}
-	// Knight
 	if enemy&bbKnightAttack[sq]&pos.ByFigure(Knight) != 0 {
 		return Knight
 	}
@@ -946,22 +934,18 @@ func (pos *Position) GetAttacker(sq Square, them Color) Figure {
 	if enemy&bbSuperAttack[sq] == 0 {
 		return NoFigure
 	}
-	// Bishop
 	all := pos.ByColor(White) | pos.ByColor(Black)
 	bishop := BishopMobility(sq, all)
 	if enemy&pos.ByFigure(Bishop)&bishop != 0 {
 		return Bishop
 	}
-	// Rook
 	rook := RookMobility(sq, all)
 	if enemy&pos.ByFigure(Rook)&rook != 0 {
 		return Rook
 	}
-	// Queen
 	if enemy&pos.ByFigure(Queen)&(bishop|rook) != 0 {
 		return Queen
 	}
-	// King.
 	if enemy&bbKingAttack[sq]&pos.ByFigure(King) != 0 {
 		return King
 	}
