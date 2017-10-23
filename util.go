@@ -3,12 +3,44 @@
 // license that can be found in the LICENSE file.
 
 // util.go contains various utility functions.
+// Prefer the free-form functions to member functions.
 
 package board
 
+// Pawns return the set of pawns of the given color.
+func Pawns(pos *Position, us Color) Bitboard {
+	return pos.ByPiece(us, Pawn)
+}
+
+// Knights return the set of knights of the given color.
+func Knights(pos *Position, us Color) Bitboard {
+	return pos.ByPiece(us, Knight)
+}
+
+// Bishops return the set of bishops of the given color.
+func Bishops(pos *Position, us Color) Bitboard {
+	return pos.ByPiece(us, Bishop)
+}
+
+// Rooks return the set of rooks of the given color.
+func Rooks(pos *Position, us Color) Bitboard {
+	return pos.ByPiece(us, Rook)
+}
+
+// Queens return the set of queens of the given color.
+func Queens(pos *Position, us Color) Bitboard {
+	return pos.ByPiece(us, Queen)
+}
+
+// Kings return the set of kings of the given color.
+// Normally there is exactly on king for each side.
+func Kings(pos *Position, us Color) Bitboard {
+	return pos.ByPiece(us, King)
+}
+
 // PawnThreats returns the squares threatened by our pawns.
 func PawnThreats(pos *Position, us Color) Bitboard {
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	return Forward(us, East(ours)|West(ours))
 }
 
@@ -16,7 +48,7 @@ func PawnThreats(pos *Position, us Color) Bitboard {
 // A backward pawn is a pawn that has no pawns behind them on its file or
 // adjacent file, it's not isolated and cannot advance safely.
 func BackwardPawns(pos *Position, us Color) Bitboard {
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	behind := ForwardFill(us, East(ours)|West(ours))
 	doubled := BackwardSpan(us, ours)
 	isolated := IsolatedPawns(pos, us)
@@ -25,13 +57,13 @@ func BackwardPawns(pos *Position, us Color) Bitboard {
 
 // DoubledPawns returns a bitboard with all doubled pawns.
 func DoubledPawns(pos *Position, us Color) Bitboard {
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	return ours & Backward(us, ours)
 }
 
 // IsolatedPawns returns a bitboard with all isolated pawns.
 func IsolatedPawns(pos *Position, us Color) Bitboard {
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	wings := East(ours) | West(ours)
 	return ours &^ Fill(wings)
 }
@@ -45,7 +77,7 @@ func PassedPawns(pos *Position, us Color) Bitboard {
 	// ..b..x..
 	// .xxx.x..
 	// .xxx.x..
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	theirs := pos.ByPiece(us.Opposite(), Pawn)
 	theirs |= East(theirs) | West(theirs)
 	block := BackwardSpan(us, theirs|ours)
@@ -54,7 +86,7 @@ func PassedPawns(pos *Position, us Color) Bitboard {
 
 // ConnectedPawns returns a bitboad with all connected pawns.
 func ConnectedPawns(pos *Position, us Color) Bitboard {
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	wings := East(ours) | West(ours)
 	return ours & (North(wings) | wings | South(wings))
 }
@@ -68,7 +100,7 @@ func RammedPawns(pos *Position, us Color) Bitboard {
 	} else if us == Black {
 		bb = BbRank7 | BbRank6
 	}
-	return pos.ByPiece(us, Pawn) & Backward(us, pos.ByPiece(us.Opposite(), Pawn)) & bb
+	return Pawns(pos, us) & Backward(us, pos.ByPiece(us.Opposite(), Pawn)) & bb
 }
 
 // Minors returns a bitboard with all knights and bishops.
@@ -94,7 +126,7 @@ func OpenFiles(pos *Position, us Color) Bitboard {
 
 // SemiOpenFiles returns all fully set files with enemy pawns, but no friendly pawns.
 func SemiOpenFiles(pos *Position, us Color) Bitboard {
-	ours := pos.ByPiece(us, Pawn)
+	ours := Pawns(pos, us)
 	theirs := pos.ByPiece(us.Opposite(), Pawn)
 	return Fill(theirs) &^ Fill(ours)
 }
