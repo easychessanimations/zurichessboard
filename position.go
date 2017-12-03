@@ -314,7 +314,7 @@ func (pos *Position) Verify() error {
 	}
 
 	// Verifies that the position has two kings.
-	if pos.ByPiece(White, King).CountMax2() != 1 || pos.ByPiece(Black, King).CountMax2() != 1 {
+	if pos.ByPiece(White, King).Count() != 1 || pos.ByPiece(Black, King).Count() != 1 {
 		return fmt.Errorf("Expected one king of each color")
 	}
 
@@ -434,7 +434,7 @@ func (pos *Position) InsufficientMaterial() bool {
 		return true
 	}
 	// KN vs K is theoretical draw.
-	if noKings == pos.ByFigure(Knight) && pos.ByFigure(Knight).CountMax2() == 1 {
+	if n := pos.ByFigure(Knight); noKings == n && n&(n-1) == 0 {
 		return true
 	}
 	// KB* vs KB* is theoretical draw if all bishops are on the same square color.

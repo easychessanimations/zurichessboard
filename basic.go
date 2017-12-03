@@ -425,17 +425,6 @@ func (bb Bitboard) LSB() Bitboard {
 	return bb & (-bb)
 }
 
-// CountMax2 is equivalent to, but faster than, min(bb.Count(), 2).
-func (bb Bitboard) CountMax2() int32 {
-	if bb == 0 {
-		return 0
-	}
-	if bb&(bb-1) == 0 {
-		return 1
-	}
-	return 2
-}
-
 // Count returns the number of squares set in bb.
 func (bb Bitboard) Count() int32 {
 	return popcnt(uint64(bb))
