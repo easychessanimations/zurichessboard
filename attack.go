@@ -14,6 +14,7 @@ package board
 import (
 	"fmt"
 	"math"
+	"math/bits"
 	"math/rand"
 )
 
@@ -240,7 +241,7 @@ func (wiz *wizard) searchSquareMagic(sq Square, mi *magicInfo) {
 
 		// Pick a good magic and test whether it gives a perfect hash.
 		var magic uint64
-		for popcnt(uint64(mask)*magic) < 8 {
+		for bits.OnesCount64(uint64(mask)*magic) < 8 {
 			magic = wiz.randMagic()>>6 + uint64(64-shift)<<58
 		}
 		wiz.tryMagicNumber(mi, sq, magic)

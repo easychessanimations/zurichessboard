@@ -13,6 +13,7 @@ package board
 
 import (
 	"fmt"
+	"math/bits"
 )
 
 var (
@@ -416,7 +417,7 @@ func (bb Bitboard) Has(sq Square) bool {
 // AsSquare returns the occupied square if the bitboard has a single piece.
 // If the board has more then one piece the result is undefined.
 func (bb Bitboard) AsSquare() Square {
-	return Square(logN(uint64(bb)))
+	return Square(bits.TrailingZeros64(uint64(bb)) & 0x3f)
 }
 
 // LSB picks a square in the board.
@@ -427,14 +428,14 @@ func (bb Bitboard) LSB() Bitboard {
 
 // Count returns the number of squares set in bb.
 func (bb Bitboard) Count() int32 {
-	return popcnt(uint64(bb))
+	return int32(bits.OnesCount64(uint64(bb)))
 }
 
 // Pop pops a set square from the bitboard.
 func (bb *Bitboard) Pop() Square {
 	sq := *bb & (-*bb)
 	*bb -= sq
-	return Square(logN(uint64(sq)))
+	return Square(bits.TrailingZeros64(uint64(sq)) & 0x3f)
 }
 
 // MoveType defines the move type.

@@ -127,7 +127,7 @@ var (
 		"8/1p2k1p1/4P3/8/1p2N3/4P3/5P2/3BK3 b - - 0 1",
 		"r1bk3r/ppp2p1p/4pp2/4n3/1b2P3/2N5/PPP2PPP/R3KBNR w KQ - 0 9",
 		"rnb1kbnr/pp1ppppp/8/1q6/2PpP3/5N2/PP3PPP/RNBQ1K1R b kq c3 0 6",
-                "1r2k2r/p5bp/4p1p1/q2pB1N1/6P1/6QP/1P6/2KR3R b k - 0 1",
+		"1r2k2r/p5bp/4p1p1/q2pB1N1/6P1/6QP/1P6/2KR3R b k - 0 1",
 		// zurichess: many captures
 		"6k1/Qp1r1pp1/p1rP3p/P3q3/2Bnb1P1/1P3PNP/4p1K1/R1R5 b - - 0 1",
 		"3r2k1/2Q2pb1/2n1r3/1p1p4/pB1PP3/n1N2p2/B1q2P1R/6RK b - - 0 1",
