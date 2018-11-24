@@ -6,8 +6,6 @@ package board
 
 import (
 	"testing"
-
-	. "bitbucket.org/zurichess/zurichess/internal/testdata"
 )
 
 func TestPositionFromFENAndBack(t *testing.T) {

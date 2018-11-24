@@ -7,8 +7,6 @@ package board
 import (
 	"strings"
 	"testing"
-
-	. "bitbucket.org/zurichess/zurichess/internal/testdata"
 )
 
 var (
