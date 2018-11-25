@@ -55,20 +55,20 @@ func BackwardPawns(pos *Position, us Color) Bitboard {
 	return ours & Backward(us, PawnThreats(pos, us.Opposite())) &^ behind &^ doubled &^ isolated
 }
 
-// DoubledPawns returns a bitboard with all doubled pawns.
+// DoubledPawns returns a bitboard with our doubled pawns.
 func DoubledPawns(pos *Position, us Color) Bitboard {
 	ours := Pawns(pos, us)
 	return ours & Backward(us, ours)
 }
 
-// IsolatedPawns returns a bitboard with all isolated pawns.
+// IsolatedPawns returns a bitboard with our isolated pawns.
 func IsolatedPawns(pos *Position, us Color) Bitboard {
 	ours := Pawns(pos, us)
 	wings := East(ours) | West(ours)
 	return ours &^ Fill(wings)
 }
 
-// PassedPawns returns a bitboard with all passed pawns.
+// PassedPawns returns a bitboard with our passed pawns.
 func PassedPawns(pos *Position, us Color) Bitboard {
 	// From white's POV: w - white pawn, b - black pawn, x - non-passed pawns.
 	// ........
@@ -84,7 +84,7 @@ func PassedPawns(pos *Position, us Color) Bitboard {
 	return ours &^ block
 }
 
-// ConnectedPawns returns a bitboad with all connected pawns.
+// ConnectedPawns returns a bitboad with our connected pawns.
 func ConnectedPawns(pos *Position, us Color) Bitboard {
 	ours := Pawns(pos, us)
 	wings := East(ours) | West(ours)
@@ -103,12 +103,12 @@ func RammedPawns(pos *Position, us Color) Bitboard {
 	return Pawns(pos, us) & Backward(us, pos.ByPiece(us.Opposite(), Pawn)) & bb
 }
 
-// Minors returns a bitboard with all knights and bishops.
+// Minors returns a bitboard with our knights and bishops.
 func Minors(pos *Position, us Color) Bitboard {
 	return pos.ByPiece2(us, Knight, Bishop)
 }
 
-// Majors returns a bitboard with all rooks and queens.
+// Majors returns a bitboard with our rooks and queens.
 func Majors(pos *Position, us Color) Bitboard {
 	return pos.ByPiece2(us, Rook, Queen)
 }
@@ -118,13 +118,13 @@ func MinorsAndMajors(pos *Position, col Color) Bitboard {
 	return pos.ByColor(col) &^ pos.ByFigure(Pawn) &^ pos.ByFigure(King)
 }
 
-// OpenFiles returns all fully set files with no pawns.
+// OpenFiles returns our fully set files with no pawns.
 func OpenFiles(pos *Position, us Color) Bitboard {
 	pawns := pos.ByFigure(Pawn)
 	return ^Fill(pawns)
 }
 
-// SemiOpenFiles returns all fully set files with enemy pawns, but no friendly pawns.
+// SemiOpenFiles returns our fully set files with enemy pawns, but no friendly pawns.
 func SemiOpenFiles(pos *Position, us Color) Bitboard {
 	ours := Pawns(pos, us)
 	theirs := pos.ByPiece(us.Opposite(), Pawn)
