@@ -995,12 +995,14 @@ func (pos *Position) GenerateFigureMoves(fig Figure, kind int, moves *[]Move) {
 }
 
 func init() {
+	fmt.Println("position init")
 	r := rand.New(rand.NewSource(5))
 	f := func() uint64 { return uint64(r.Int63())<<32 ^ uint64(r.Int63()) }
 	initZobristPiece(f)
 	initZobristEnpassant(f)
 	initZobristCastle(f)
 	initZobristColor(f)
+	fmt.Println("position init done")
 }
 
 func initZobristPiece(f func() uint64) {

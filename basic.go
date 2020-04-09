@@ -238,6 +238,10 @@ func ColorFigure(col Color, fig Figure) Piece {
 }
 
 // Color returns piece's color.
+// 21844	=       101010101010100b
+// TODO: adding 3 more pieces
+// 1398100	= 101010101010101010100b
+
 func (pi Piece) Color() Color {
 	return Color(21844 >> pi & 3)
 }
@@ -302,12 +306,18 @@ func South(bb Bitboard) Bitboard {
 	return bb >> 8
 }
 
+// meaning of &^ operator
+// https://stackoverflow.com/questions/34459450/what-is-the-operator-in-golang
+// turn mask bits off
+
 // East shifts all squares one file right.
+// delete h file, then shift left
 func East(bb Bitboard) Bitboard {
 	return bb &^ BbFileH << 1
 }
 
 // West shifts all squares one file left.
+// delete a file, then shift right
 func West(bb Bitboard) Bitboard {
 	return bb &^ BbFileA >> 1
 }
@@ -416,6 +426,7 @@ func (bb Bitboard) Has(sq Square) bool {
 
 // AsSquare returns the occupied square if the bitboard has a single piece.
 // If the board has more then one piece the result is undefined.
+// https://golang.org/pkg/math/bits/#TrailingZeros64
 func (bb Bitboard) AsSquare() Square {
 	return Square(bits.TrailingZeros64(uint64(bb)) & 0x3f)
 }
@@ -427,6 +438,7 @@ func (bb Bitboard) LSB() Bitboard {
 }
 
 // Count returns the number of squares set in bb.
+// https://golang.org/pkg/math/bits/#OnesCount64
 func (bb Bitboard) Count() int32 {
 	return int32(bits.OnesCount64(uint64(bb)))
 }
@@ -464,6 +476,8 @@ const (
 //   0f.00.00.00 - capture
 //   f0.00.00.00 - piece
 type Move uint32
+
+// TODO: extend move to 64 bit, to allow for more move information (like promotion square)?
 
 // MakeMove constructs a move.
 func MakeMove(moveType MoveType, from, to Square, capture, target Piece) Move {
@@ -627,4 +641,11 @@ func CastlingRook(kingEnd Square) (Piece, Square, Square) {
 	rookStart := kingEnd&^3 | (kingEnd & 4 >> 1) | (kingEnd & 4 >> 2)
 	rookEnd := kingEnd ^ (kingEnd & 4 >> 1) | 1
 	return piece, rookStart, rookEnd
+}
+
+func init() {
+	fmt.Println("basic init")
+	fmt.Println("black pawn", int(BlackPawn))
+	fmt.Println("white king", int(WhiteKing))
+	fmt.Println("piece array size", PieceArraySize)
 }
